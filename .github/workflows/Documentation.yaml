@@ -1,0 +1,25 @@
+name: Documentation
+on:
+  - push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: '1'
+      - name: Install dependencies
+        run: julia --project --color=yes -e 'using Pkg; Pkg.instantiate()'
+      - name: Lotka-Volterra 2d
+        run: julia --project=.. --color=yes weave-lotka-volterra-2d-singular.jl
+        working-directory: docs
+      - name: Massless Charged Particle
+        run: julia --project=.. --color=yes weave-lotka-volterra-2d-symmetric.jl
+        working-directory: docs
+      - name: Documentation
+        run: julia --project=.. --color=yes make.jl
+        working-directory: docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
