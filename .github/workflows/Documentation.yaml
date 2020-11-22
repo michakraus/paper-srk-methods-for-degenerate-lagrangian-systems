@@ -10,7 +10,7 @@ jobs:
         with:
           version: '1'
       - name: Install dependencies
-        run: julia --project --color=yes -e 'using Pkg; Pkg.instantiate()'
+        run: julia --project --color=yes -e 'using Pkg; Pkg.instantiate(); Pkg.build(); Pkg.precompile();'
       - name: Lotka-Volterra 2d (singular)
         run: julia --project=.. --color=yes weave-lotka-volterra-2d-singular.jl
         working-directory: docs
