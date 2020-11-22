@@ -11,10 +11,10 @@ jobs:
           version: '1'
       - name: Install dependencies
         run: julia --project --color=yes -e 'using Pkg; Pkg.instantiate()'
-      - name: Lotka-Volterra 2d
+      - name: Lotka-Volterra 2d (singular)
         run: julia --project=.. --color=yes weave-lotka-volterra-2d-singular.jl
         working-directory: docs
-      - name: Massless Charged Particle
+      - name: Lotka-Volterra 2d (symmetric)
         run: julia --project=.. --color=yes weave-lotka-volterra-2d-symmetric.jl
         working-directory: docs
       - name: Documentation
