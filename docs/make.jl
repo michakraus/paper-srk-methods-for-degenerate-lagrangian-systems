@@ -33,6 +33,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/michakraus/papers-srk-methods-for-degenerate-lagrangian-systems.jl",
+    repo="github.com/michakraus/paper-srk-methods-for-degenerate-lagrangian-systems",
     devbranch="main"
 )
