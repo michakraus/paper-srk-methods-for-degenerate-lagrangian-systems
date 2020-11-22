@@ -34,4 +34,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/michakraus/papers-srk-methods-for-degenerate-lagrangian-systems.jl",
+    devbranch="main"
 )
