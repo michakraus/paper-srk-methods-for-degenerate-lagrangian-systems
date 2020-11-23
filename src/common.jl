@@ -59,6 +59,14 @@ end
 _linebreak(io) = show(io, "text/markdown", MD(Paragraph([LineBreak()])))
 
 
+function _plot_figure_md(file, name, filename)
+    if isfile(filename)
+        show(file, "text/markdown", Markdown.parse("![$name]($filename)"))
+        _linebreak(file)
+    end
+end
+
+
 function write_plots(dir, file, name, fig_suff)
 
     plot_file = file * ".md"
@@ -67,22 +75,19 @@ function write_plots(dir, file, name, fig_suff)
         show(f, "text/markdown", Markdown.parse("# $name"))
         _linebreak(f)
 
-        show(f, "text/markdown", Markdown.parse("![$name]($(dir)/$(file)_solution$(fig_suff))"))
-        _linebreak(f)
-        show(f, "text/markdown", Markdown.parse("![$name]($(dir)/$(file)_traces$(fig_suff))"))
-        _linebreak(f)
+        _plot_figure_md(f, name, "$(dir)/$(file)_solution$(fig_suff)")
+        _plot_figure_md(f, name, "$(dir)/$(file)_traces$(fig_suff)")
 
         show(f, "text/markdown", Markdown.parse("## Energy Error"))
         _linebreak(f)
-        show(f, "text/markdown", Markdown.parse("![$name]($(dir)/$(file)_energy_error$(fig_suff))"))
-        _linebreak(f)
-        show(f, "text/markdown", Markdown.parse("![$name]($(dir)/$(file)_energy_drift$(fig_suff))"))
-        _linebreak(f)
+
+        _plot_figure_md(f, name, "$(dir)/$(file)_energy_error$(fig_suff)")
+        _plot_figure_md(f, name, "$(dir)/$(file)_energy_drift$(fig_suff)")
         
         show(f, "text/markdown", Markdown.parse("## Constraint"))
         _linebreak(f)
-        show(f, "text/markdown", Markdown.parse("![$name]($(dir)/$(file)_constraint_error$(fig_suff))"))
-        _linebreak(f)
+        
+        _plot_figure_md(f, name, "$(dir)/$(file)_constraint_error$(fig_suff)")
     end
 end
 
