@@ -1,9 +1,6 @@
 # Symplectic Runge-Kutta Methods for Degenerate Lagrangian Systems
 
-This packages serves to document the examples from the paper *Symplectic Runge-Kutta Methods for Degenerate Lagrangian Systems*.
-
-The integrators are implemented in [GeometricIntegrators.jl](https://github.com/JuliaGNI/GeometricIntegrators.jl) in the modules `GeometricIntegrators.Integrators` and `GeometricIntegrators.Integrators.VPRK`, and the example problems in [GeometricProblems.jl](https://github.com/JuliaGNI/GeometricProblems.jl).
-The corresponding plots can be found in the [documentation](https://michakraus.github.io/srk-methods-for-degenerate-lagrangian-systems.jl/stable).
+This packages serves to document the examples from the paper *Symplectic Runge-Kutta Methods for Degenerate Lagrangian Systems*. The integrators are implemented in [GeometricIntegrators.jl](https://github.com/JuliaGNI/GeometricIntegrators.jl) in the modules `GeometricIntegrators.Integrators` and `GeometricIntegrators.Integrators.VPRK`, and the example problems in [GeometricProblems.jl](https://github.com/JuliaGNI/GeometricProblems.jl).
 
 ## Numerical Examples
 
