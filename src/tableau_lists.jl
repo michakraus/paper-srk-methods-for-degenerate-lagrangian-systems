@@ -12,19 +12,19 @@ end
 
 function run_list_vprk_lobatto_IIIA_IIIB(iode)
     run_list(iode, :TableauVPRK, (
-            ( TableauVPLobIIIA2(),    "vprk_lobatto_IIIA_IIIB2" ),
-            ( TableauVPLobIIIA3(),    "vprk_lobatto_IIIA_IIIB3" ),
-            ( TableauVPLobIIIA4(),    "vprk_lobatto_IIIA_IIIB4" ),
-            ( TableauVPLobIIIA5(),    "vprk_lobatto_IIIA_IIIB5" ),
+            ( TableauVPLobIIIA(2),    "vprk_lobatto_IIIA_IIIB2" ),
+            ( TableauVPLobIIIA(3),    "vprk_lobatto_IIIA_IIIB3" ),
+            ( TableauVPLobIIIA(4),    "vprk_lobatto_IIIA_IIIB4" ),
+            ( TableauVPLobIIIA(5),    "vprk_lobatto_IIIA_IIIB5" ),
         ))
 end
 
 function run_list_vprk_lobatto_IIIB_IIIA(iode)
     run_list(iode, :TableauVPRK, (
-            ( TableauVPLobIIIB2(),    "vprk_lobatto_IIIB_IIIA2" ),
-            ( TableauVPLobIIIB3(),    "vprk_lobatto_IIIB_IIIA3" ),
-            ( TableauVPLobIIIB4(),    "vprk_lobatto_IIIB_IIIA4" ),
-            ( TableauVPLobIIIB5(),    "vprk_lobatto_IIIB_IIIA5" ),
+            ( TableauVPLobIIIB(2),    "vprk_lobatto_IIIB_IIIA2" ),
+            ( TableauVPLobIIIB(3),    "vprk_lobatto_IIIB_IIIA3" ),
+            ( TableauVPLobIIIB(4),    "vprk_lobatto_IIIB_IIIA4" ),
+            ( TableauVPLobIIIB(5),    "vprk_lobatto_IIIB_IIIA5" ),
         ))
 end
 
