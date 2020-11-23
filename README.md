@@ -17,8 +17,7 @@ If you use the figures or implementations provided here, please cite this reposi
 
 ```
 @misc{Kraus:2020:SRKMethodsRepo,
-  title={{paper-srk-methods-for-degenerate-lagrangian-systems}.
-         Symplectic Runge-Kutta Methods for Degenerate Lagrangian Systems},
+  title={Companion Repository to ``Symplectic {R}unge--{K}utta Methods for Degenerate {L}agrangian Systems''},
   author={Kraus, Michael},
   year={2020},
   month={11},
