@@ -1,7 +1,7 @@
 name = "SrkMethodsForDegenerateLagrangianSystems"
 uuid = "869a1a14-8b14-4841-8e43-81a3917c2902"
 authors = ["Michael Kraus"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
