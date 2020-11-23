@@ -2,7 +2,7 @@
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://michakraus.github.io/paper-srk-methods-for-degenerate-lagrangian-systems/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://michakraus.github.io/paper-srk-methods-for-degenerate-lagrangian-systems/dev)
-[![DOI](https://zenodo.org/badge/312553161.svg)](https://zenodo.org/badge/latestdoi/312553161)
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.4285894.svg)](https://doi.org/10.5281/zenodo.4285894)
 
 This packages serves to document the examples from the paper *Symplectic Runge-Kutta Methods for Degenerate Lagrangian Systems*.
 
@@ -23,10 +23,9 @@ If you use the figures or implementations provided here, please cite this reposi
   year={2020},
   month={11},
   howpublished={\url{https://github.com/michakraus/paper-srk-methods-for-degenerate-lagrangian-systems}},
-  doi={10.5281/zenodo.4285895}
+  doi={10.5281/zenodo.4285894}
 }
 ```
-
 
 ## Licenses
 
