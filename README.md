@@ -13,6 +13,18 @@ The corresponding plots can be found in the [documentation](https://michakraus.g
 
 * Michael Kraus. Symplectic Runge-Kutta Methods for Degenerate Lagrangian Systems. 2020.
 
+If you use the integrators described in the article above, please cite GeometricIntegrators.jl as
+
+```
+@misc{Kraus:2020:GeometricIntegrators,
+  title={GeometricIntegrators.jl: A Julia library of geometric integrators for ordinary differential equations and differential algebraic equations},
+  author={Kraus, Michael},
+  year={2020},
+  howpublished={\url{https://github.com/JuliaGNI/GeometricIntegrators.jl}},
+  doi={10.5281/zenodo.3648325}
+}
+```
+
 If you use the figures or implementations provided here, please cite this repository as
 
 ```
