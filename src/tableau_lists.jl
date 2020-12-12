@@ -37,22 +37,22 @@ end
 
 function run_list_srk_glrk(iode)
     run_list(iode, :TableauFIRK, (
-            ( getTableauGLRK(1),          "srk_glrk1",      IntegratorSRKimplicit ),
-            ( getTableauGLRK(2),          "srk_glrk2",      IntegratorSRKimplicit ),
-            ( getTableauGLRK(3),          "srk_glrk3",      IntegratorSRKimplicit ),
-            ( getTableauGLRK(4),          "srk_glrk4",      IntegratorSRKimplicit ),
-            ( getTableauGLRK(5),          "srk_glrk5",      IntegratorSRKimplicit ),
-            ( getTableauGLRK(6),          "srk_glrk6",      IntegratorSRKimplicit ),
+            ( TableauGLRK(1),          "srk_glrk1",      IntegratorSRKimplicit ),
+            ( TableauGLRK(2),          "srk_glrk2",      IntegratorSRKimplicit ),
+            ( TableauGLRK(3),          "srk_glrk3",      IntegratorSRKimplicit ),
+            ( TableauGLRK(4),          "srk_glrk4",      IntegratorSRKimplicit ),
+            ( TableauGLRK(5),          "srk_glrk5",      IntegratorSRKimplicit ),
+            ( TableauGLRK(6),          "srk_glrk6",      IntegratorSRKimplicit ),
         ))
 end
 
 function run_list_firk_glrk(iode)
     run_list(iode, :TableauFIRK, (
-            ( getTableauGLRK(1),          "firk_glrk1",     IntegratorFIRKimplicit ),
-            ( getTableauGLRK(2),          "firk_glrk2",     IntegratorFIRKimplicit ),
-            ( getTableauGLRK(3),          "firk_glrk3",     IntegratorFIRKimplicit ),
-            ( getTableauGLRK(4),          "firk_glrk4",     IntegratorFIRKimplicit ),
-            ( getTableauGLRK(5),          "firk_glrk5",     IntegratorFIRKimplicit ),
-            ( getTableauGLRK(6),          "firk_glrk6",     IntegratorFIRKimplicit ),
+            ( TableauGLRK(1),          "firk_glrk1",     IntegratorFIRKimplicit ),
+            ( TableauGLRK(2),          "firk_glrk2",     IntegratorFIRKimplicit ),
+            ( TableauGLRK(3),          "firk_glrk3",     IntegratorFIRKimplicit ),
+            ( TableauGLRK(4),          "firk_glrk4",     IntegratorFIRKimplicit ),
+            ( TableauGLRK(5),          "firk_glrk5",     IntegratorFIRKimplicit ),
+            ( TableauGLRK(6),          "firk_glrk6",     IntegratorFIRKimplicit ),
         ))
 end
