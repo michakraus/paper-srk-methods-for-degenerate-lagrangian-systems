@@ -17,7 +17,7 @@ If you use the integrators described in the article above, please cite Geometric
 
 ```
 @misc{Kraus:2020:GeometricIntegrators,
-  title={GeometricIntegrators.jl: A Julia library of geometric integrators for ordinary differential equations and differential algebraic equations},
+  title={GeometricIntegrators.jl: Geometric Numerical Integration in Julia},
   author={Kraus, Michael},
   year={2020},
   howpublished={\url{https://github.com/JuliaGNI/GeometricIntegrators.jl}},
