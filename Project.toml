@@ -19,6 +19,7 @@ GeometricIntegrators = "0.6"
 GeometricProblems = "^0.1.2"
 Latexify = "0.14"
 Plots = "1"
+PoincareInvariants = "0.3"
 Weave = "0.10"
 julia = "1"
 
