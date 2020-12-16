@@ -1,5 +1,5 @@
 # Lotka-Volterra 2d (singular Lagrangian) with Radau-IIA VPRK Integrators
 
 ```julia
-run_list_vprk_radau(lotka_volterra_2d_iode())
+run_list(lotka_volterra_2d_iode(), :TableauVPRK, tableaus_vprk_radau())
 ```

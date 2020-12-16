@@ -1,5 +1,5 @@
 # Lotka-Volterra 2d (singular Lagrangian) with Lobatto-IIIA-IIIB VPRK Integrators
 
 ```julia
-run_list_vprk_lobatto_IIIA_IIIB(lotka_volterra_2d_iode())
+run_list(lotka_volterra_2d_iode(), :TableauVPRK, tableaus_vprk_lobatto_IIIA_IIIB())
 ```

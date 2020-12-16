@@ -1,5 +1,5 @@
 # Lotka-Volterra 2d (symmetric Lagrangian) with Gauss-Legendre FIRK Integrators
 
 ```julia
-run_list_firk_glrk(lotka_volterra_2d_iode())
+run_list(lotka_volterra_2d_iode(), :TableauFIRK, tableaus_firk_glrk())
 ```
