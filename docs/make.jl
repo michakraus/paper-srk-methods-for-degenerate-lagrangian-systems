@@ -54,7 +54,15 @@ makedocs(;
     ],
 )
 
-deploydocs(;
-    repo="github.com/michakraus/paper-srk-methods-for-degenerate-lagrangian-systems",
-    devbranch="main"
-)
+# Skipped when the weave matrix of the CI workflow did not complete (`DEPLOY_DOCS` is set
+# there): publishing a site that is missing the pages of the failed jobs would silently
+# drop results from the documentation. Defaults to deploying, so that local builds and
+# manual runs are unaffected.
+if get(ENV, "DEPLOY_DOCS", "true") == "true"
+    deploydocs(;
+        repo="github.com/michakraus/paper-srk-methods-for-degenerate-lagrangian-systems",
+        devbranch="main"
+    )
+else
+    @warn "Incomplete weave run – skipping deploydocs. The built site is kept as a CI artifact."
+end
