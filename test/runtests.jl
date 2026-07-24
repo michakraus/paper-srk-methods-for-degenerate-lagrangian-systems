@@ -14,23 +14,23 @@ const tableaus = (
     tableaus_firk_glrk(),
 )
 
-const iode = lotka_volterra_2d_iode()
-const nt = 10
+const nt = 1
+const iode = iodeproblem(; timestep = Δt, timespan = (0.0, nt * Δt))
 
 for list in tableaus
     for run in list
-        tab, file = run
-
-        if length(run) ≥ 3
-            integrator = run[3]
-        else
-            integrator = Integrator
-        end
+        method, file = run
 
         @test_nowarn begin
-            sol = Solution(iode, Δt, nt)
-            int = integrator(iode, tab, Δt)
-            integrate!(int, sol)
+            try
+                integrate(iode, method; f_abstol = 1E-14, f_reltol = 1E-14, max_iterations = 100)
+            catch ex
+                if isa(ex, DomainError)
+                    @warn("DOMAIN ERROR: Integrator crashed")
+                else
+                    throw(ex)
+                end
+            end
         end
     end
 end

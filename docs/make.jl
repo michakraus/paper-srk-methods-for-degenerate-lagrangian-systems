@@ -4,9 +4,13 @@ using GeometricIntegrators
 makedocs(;
     authors="Michael Kraus",
     sitename="Symplectic Runge-Kutta Methods for Degenerate Lagrangian Systems",
+    # Some integrators crash on the degenerate Lagrangian and therefore produce no
+    # figures; their pages reference those (missing) images unconditionally. Downgrade
+    # the resulting broken-link errors to warnings (Documenter ≥ 1 errors by default).
+    warnonly=[:cross_references],
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://michakraus.github.io/papers-srk-methods-for-degenerate-lagrangian-systems",
+        canonical="https://michakraus.github.io/paper-srk-methods-for-degenerate-lagrangian-systems",
         assets=String[],
     ),
     pages=[

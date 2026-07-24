@@ -1,5 +1,5 @@
 # Lotka-Volterra 2d (singular Lagrangian) with Gauss-Legendre SRK Integrators
 
 ```julia
-run_list(lotka_volterra_2d_iode(), :TableauFIRK, tableaus_srk_glrk())
+run_list(iodeproblem(timestep = Δt, timespan = (0.0, Δt * nt)), :TableauFIRK, tableaus_srk_glrk())
 ```

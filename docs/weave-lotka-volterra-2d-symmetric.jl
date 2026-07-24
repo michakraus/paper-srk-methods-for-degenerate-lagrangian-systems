@@ -1,7 +1,6 @@
 using GeometricIntegrators
 using Weave
 
-GeometricIntegrators.set_config(:verbosity, 0)
 
 Weave.set_chunk_defaults!(:echo => false, :results => "raw")
 

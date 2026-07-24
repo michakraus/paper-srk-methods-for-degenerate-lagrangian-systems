@@ -1,60 +1,60 @@
 
 function tableaus_vprk_glrk()
     (
-        ( TableauVPGLRK(1),          "vprk_glrk1" ),
-        ( TableauVPGLRK(2),          "vprk_glrk2" ),
-        ( TableauVPGLRK(3),          "vprk_glrk3" ),
-        ( TableauVPGLRK(4),          "vprk_glrk4" ),
-        ( TableauVPGLRK(5),          "vprk_glrk5" ),
-        ( TableauVPGLRK(6),          "vprk_glrk6" ),
+        ( VPRKGauss(1),          "vprk_gauss1" ),
+        ( VPRKGauss(2),          "vprk_gauss2" ),
+        ( VPRKGauss(3),          "vprk_gauss3" ),
+        ( VPRKGauss(4),          "vprk_gauss4" ),
+        ( VPRKGauss(5),          "vprk_gauss5" ),
+        ( VPRKGauss(6),          "vprk_gauss6" ),
     )
 end
 
 function tableaus_vprk_lobatto_IIIA_IIIB()
     (
-        ( TableauVPLobattoIIIA(2),    "vprk_lobatto_IIIA_IIIB2" ),
-        ( TableauVPLobattoIIIA(3),    "vprk_lobatto_IIIA_IIIB3" ),
-        ( TableauVPLobattoIIIA(4),    "vprk_lobatto_IIIA_IIIB4" ),
-        ( TableauVPLobattoIIIA(5),    "vprk_lobatto_IIIA_IIIB5" ),
+        ( VPRKLobattoIIIAIIIB(2),    "vprk_lobatto_IIIA_IIIB2" ),
+        ( VPRKLobattoIIIAIIIB(3),    "vprk_lobatto_IIIA_IIIB3" ),
+        ( VPRKLobattoIIIAIIIB(4),    "vprk_lobatto_IIIA_IIIB4" ),
+        ( VPRKLobattoIIIAIIIB(5),    "vprk_lobatto_IIIA_IIIB5" ),
     )
 end
 
 function tableaus_vprk_lobatto_IIIB_IIIA()
     (
-        ( TableauVPLobattoIIIB(2),    "vprk_lobatto_IIIB_IIIA2" ),
-        ( TableauVPLobattoIIIB(3),    "vprk_lobatto_IIIB_IIIA3" ),
-        ( TableauVPLobattoIIIB(4),    "vprk_lobatto_IIIB_IIIA4" ),
-        ( TableauVPLobattoIIIB(5),    "vprk_lobatto_IIIB_IIIA5" ),
+        ( VPRKLobattoIIIBIIIA(2),    "vprk_lobatto_IIIB_IIIA2" ),
+        ( VPRKLobattoIIIBIIIA(3),    "vprk_lobatto_IIIB_IIIA3" ),
+        ( VPRKLobattoIIIBIIIA(4),    "vprk_lobatto_IIIB_IIIA4" ),
+        ( VPRKLobattoIIIBIIIA(5),    "vprk_lobatto_IIIB_IIIA5" ),
     )
 end
 
 function tableaus_vprk_radau()
     (
-        ( TableauVPRadauIIAIIA(2),     "vprk_radau_IIA2" ),
-        ( TableauVPRadauIIAIIA(3),     "vprk_radau_IIA3" ),
-        ( TableauVPRadauIIAIIA(4),     "vprk_radau_IIA4" ),
-        ( TableauVPRadauIIAIIA(5),     "vprk_radau_IIA5" ),
+        ( VPRKRadauIIA(2),     "vprk_radau_IIA2" ),
+        ( VPRKRadauIIA(3),     "vprk_radau_IIA3" ),
+        ( VPRKRadauIIA(4),     "vprk_radau_IIA4" ),
+        ( VPRKRadauIIA(5),     "vprk_radau_IIA5" ),
     )
 end
 
 function tableaus_srk_glrk()
     (
-        ( TableauGLRK(1),          "srk_glrk1",      IntegratorSRKimplicit ),
-        ( TableauGLRK(2),          "srk_glrk2",      IntegratorSRKimplicit ),
-        ( TableauGLRK(3),          "srk_glrk3",      IntegratorSRKimplicit ),
-        ( TableauGLRK(4),          "srk_glrk4",      IntegratorSRKimplicit ),
-        ( TableauGLRK(5),          "srk_glrk5",      IntegratorSRKimplicit ),
-        ( TableauGLRK(6),          "srk_glrk6",      IntegratorSRKimplicit ),
+        ( DVRK(Gauss(1)),          "srk_gauss1" ),
+        ( DVRK(Gauss(2)),          "srk_gauss2" ),
+        ( DVRK(Gauss(3)),          "srk_gauss3" ),
+        ( DVRK(Gauss(4)),          "srk_gauss4" ),
+        ( DVRK(Gauss(5)),          "srk_gauss5" ),
+        ( DVRK(Gauss(6)),          "srk_gauss6" ),
     )
 end
 
 function tableaus_firk_glrk()
     (
-        ( TableauGLRK(1),          "firk_glrk1",     IntegratorFIRKimplicit ),
-        ( TableauGLRK(2),          "firk_glrk2",     IntegratorFIRKimplicit ),
-        ( TableauGLRK(3),          "firk_glrk3",     IntegratorFIRKimplicit ),
-        ( TableauGLRK(4),          "firk_glrk4",     IntegratorFIRKimplicit ),
-        ( TableauGLRK(5),          "firk_glrk5",     IntegratorFIRKimplicit ),
-        ( TableauGLRK(6),          "firk_glrk6",     IntegratorFIRKimplicit ),
+        ( Gauss(1),          "firk_gauss1" ),
+        ( Gauss(2),          "firk_gauss2" ),
+        ( Gauss(3),          "firk_gauss3" ),
+        ( Gauss(4),          "firk_gauss4" ),
+        ( Gauss(5),          "firk_gauss5" ),
+        ( Gauss(6),          "firk_gauss6" ),
     )
 end

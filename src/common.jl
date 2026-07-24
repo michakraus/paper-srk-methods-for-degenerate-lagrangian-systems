@@ -1,62 +1,88 @@
 
-using Documenter
-using Latexify
 using Markdown
 using Markdown: MD, Paragraph, LineBreak
-using Plots
+
+using CairoMakie
 
 using GeometricIntegrators
-using GeometricIntegrators.Integrators.VPRK
+import GeometricIntegratorsBase
+const GIB = GeometricIntegratorsBase
+using SimpleSolvers: NonlinearSolverException
 
-using GeometricProblems.Diagnostics
-using GeometricProblems.PlotRecipes
+using GeometricProblems.LotkaVolterra2d: plot_solution, plot_phase_portrait, plot_traces
+using GeometricProblems.Diagnostics: plot_energy_error, plot_energy_drift, plot_constraint_error
 
 
-function Integrators.integrate!(int::Union{IntegratorVPRK{DT,TT,D,S},IntegratorFIRKimplicit{DT,TT,D,S},IntegratorSRKimplicit{DT,TT,D,S}}, sol::Solution{DT,TT}) where {DT,TT,D,S}
-    asol = AtomicSolution(int)
+# Shared Makie plotting style (kept identical to the SPARK companion package). Larger
+# fonts and thicker lines than the Makie defaults, tuned for the fixed figure sizes of
+# the GeometricProblems plot recipes. Unicode axis labels are selected via `latex=false`
+# on every plot call below.
+const PLOT_THEME = Theme(
+    fontsize = 18,
+    Lines    = (linewidth = 2,),
+    Scatter  = (markersize = 10,),
+    Axis     = (
+        xlabelsize     = 22,
+        ylabelsize     = 22,
+        xticklabelsize = 16,
+        yticklabelsize = 16,
+        titlesize      = 20,
+    ),
+)
 
-    # loop over initial conditions showing progress bar
-    for m in eachsample(sol)
-        get_initial_conditions!(sol, asol, m, 1)
-        initialize!(int, asol)
-
-        n = 0
-        try
-            for outer n in eachtimestep(sol)
-                integrate!(int, sol, asol, m, n)
-            end
-        catch ex
-            tstr = " in time step " * string(n)
-        
-            if nsamples(sol) > 1
-                tstr *= " for initial condition " * string(m)
-            end
-            
-            tstr *= "."
-            
-            if isa(ex, DomainError)
-                show(stdout, "text/markdown", Markdown.parse("DOMAIN ERROR: Simulation crashed" * tstr))
-                @warn("DOMAIN ERROR: Simulation crashed" * tstr)
-            elseif isa(ex, NonlinearSolverException)
-                show(stdout, "text/markdown", Markdown.parse("SOLVER ERROR: Simulation crashed" * tstr))
-                show(stdout, "text/markdown", Markdown.parse(ex.msg))
-                @warn("SOLVER ERROR: Simulation crashed" * tstr)
-                @warn(ex.msg)
-            else
-                show(stdout, "text/markdown", Markdown.parse("ERROR: Simulation crashed with $(typeof(ex)) " * tstr))
-                show(stdout, "text/markdown", Markdown.parse(ex.msg))
-                @warn("ERROR: Simulation crashed with $(typeof(ex)) " * tstr)
-                @warn(ex.msg)
-                # showerror(stdout, ex, catch_backtrace())
-            end
-        end
-    end
-
-    nothing
-end
+set_theme!(PLOT_THEME)
 
 
 _linebreak(io) = show(io, "text/markdown", MD(Paragraph([LineBreak()])))
+
+
+# Integrate an IODE step-by-step so that a crash (solver failure, singular matrix,
+# NaNs, …) does not discard the whole run: we keep the solution up to the last
+# successful time step. Returns `(sol, last_good, err)` where `last_good` is the index
+# of the last completed step and `err` is `nothing` (success), `:nan` (NaNs in the
+# state), or the caught exception. The steps after `last_good` are padded with the last
+# good state so downstream invariant computations never see uninitialized data.
+function integrate_partial(iode, method)
+    int     = GIB.GeometricIntegrator(iode, method; f_abstol=1E-14, f_reltol=1E-14, max_iterations=100)
+    sol     = GIB.Solution(iode)
+    solstep = GIB.solutionstep(int, sol[0])
+    state   = GIB.current(solstep)
+    nt      = GIB.ntime(sol)
+
+    last_good = 0
+    err = nothing
+
+    try
+        for n in 1:nt
+            GIB.reset!(solstep, GIB.timesteps(sol)[n])
+            GIB.integrate!(solstep, int)
+            if isnan(state)
+                err = :nan
+                break
+            end
+            copy!(sol, state, n)
+            last_good = n
+        end
+    catch ex
+        err = ex
+    end
+
+    for n in (last_good+1):nt
+        sol.q[n] = copy(sol.q[last_good])
+        sol.p[n] = copy(sol.p[last_good])
+    end
+
+    (sol, last_good, err)
+end
+
+
+# Short, human-readable one-line description of a crash (no stack trace).
+function _failure_message(err)
+    err === :nan                      && return "NaNs detected in the solution"
+    err isa NonlinearSolverException  && return "solver error – " * err.msg
+    err isa DomainError               && return "domain error"
+    return string(nameof(typeof(err)))
+end
 
 
 function _plot_figure_md(file, name, filename)
@@ -86,61 +112,62 @@ function write_plots(dir, file, name, fig_suff)
 
         _plot_figure_md(f, name, "$(dir)/$(file)_energy_error$(fig_suff)")
         _plot_figure_md(f, name, "$(dir)/$(file)_energy_drift$(fig_suff)")
-        
+
         show(f, "text/markdown", Markdown.parse("## Constraint"))
         _linebreak(f)
-        
+
         _plot_figure_md(f, name, "$(dir)/$(file)_constraint_error$(fig_suff)")
     end
 end
 
 
-function plot(sol, equ, dir, file, fig_suff)
+# Plot the solution up to time step `last_good` (`:auto` plots the whole solution). All
+# time-trace panels are limited to `last_good` and share the full-tspan x-axis, so a
+# partial run shows its trajectory up to the crash within the complete time interval.
+function make_plots(sol, equ, dir, file, fig_suff, last_good)
     if !isdir(dir)
         mkdir(dir)
     end
 
+    nt      = ntime(sol)
+    ntplot  = last_good ≥ nt ? (:auto) : last_good
+
     try
-        plot_lotka_volterra_2d(sol, equ; nt=lastentry(sol), fmt=:png)
-        savefig(dir * "/" * file * fig_suff)
+        # All GeometricProblems recipes set their own x-limits to the plotted time
+        # range, so no post-processing is needed here.
+        save(dir * "/" * file * fig_suff, plot_solution(sol, equ; latex=false, nt=ntplot))
+        save(dir * "/" * file * "_solution" * fig_suff, plot_phase_portrait(sol; latex=false, nt=ntplot))
+        save(dir * "/" * file * "_traces" * fig_suff, plot_traces(sol, equ; latex=false, nt=ntplot))
 
-        plot_lotka_volterra_2d_solution(sol, equ; nt=lastentry(sol), fmt=:png)
-        savefig(dir * "/" * file * "_solution" * fig_suff)
+        save(dir * "/" * file * "_energy_error" * fig_suff, plot_energy_error(sol; latex=false, nt=ntplot))
 
-        plot_lotka_volterra_2d_traces(sol, equ; nt=lastentry(sol), fmt=:png)
-        savefig(dir * "/" * file * "_traces" * fig_suff)
+        # Drift is an interval-based diagnostic; only show the intervals before the crash.
+        ntdrift = last_good ≥ nt ? (:auto) : div(last_good, div(nt, 10))
+        save(dir * "/" * file * "_energy_drift" * fig_suff, plot_energy_drift(sol; latex=false, nt=ntdrift))
 
-        H, ΔH = compute_energy_error(sol.t, sol.q, equ.parameters)
-        plotenergyerror(sol.t, ΔH; nt=lastentry(sol), fmt=:png)
-        savefig(dir * "/" * file * "_energy_error" * fig_suff)
-
-        plotenergydrift(compute_error_drift(sol.t, ΔH, div(ntime(sol), 10))...; nt=lastentry(sol))
-        savefig(dir * "/" * file * "_energy_drift" * fig_suff)
-
-        plotconstrainterror(sol.t, compute_momentum_error(sol.t, sol.q, sol.p, (t,q,k)->ϑ(t,q,equ.parameters,k)); nt=lastentry(sol), fmt=:png)
-        savefig(dir * "/" * file * "_constraint_error" * fig_suff)
+        save(dir * "/" * file * "_constraint_error" * fig_suff, plot_constraint_error(sol; latex=false, nt=ntplot))
     catch ex
-        if isa(ex, DomainError)
-            show(stdout, "text/markdown", Markdown.parse("DOMAIN ERROR: Diagnostics crashed."))
-            @warn("DOMAIN ERROR: Diagnostics crashed.")
-        else
-            show(stdout, "text/markdown", Markdown.parse("ERROR: Plot crashed with $(typeof(ex))"))
-            show(stdout, "text/markdown", Markdown.parse(ex.msg))
-            @warn("ERROR: Plot crashed with $(typeof(ex))")
-            @warn(ex.msg)
-            showerror(stdout, ex, catch_backtrace())
-        end
+        show(stdout, "text/markdown", Markdown.parse("**Plotting failed: $(_failure_message(ex)).**"))
+        _linebreak(stdout)
+        @warn("Plotting failed: $(_failure_message(ex))")
     end
 end
 
 
-function run_integrator(iode, tab, integrator, nt, dir, file, fig_suff)
-    sol = Solution(iode, Δt, nt)
-    int = integrator(iode, tab, Δt)
+function run_integrator(iode, method, dir, file, fig_suff)
+    sol, last_good, err = integrate_partial(iode, method)
 
-    integrate!(int, sol)
+    if err !== nothing
+        show(stdout, "text/markdown",
+             Markdown.parse("**Simulation crashed after $(last_good) of $(ntime(sol)) time steps: $(_failure_message(err)).**"))
+        _linebreak(stdout)
+        @warn("Simulation crashed after $(last_good) of $(ntime(sol)) time steps: $(_failure_message(err))")
+    end
 
-    plot(sol, iode, dir, file, fig_suff)
+    # Plot whatever was computed (the trajectory up to the last successful step).
+    if last_good ≥ 1
+        make_plots(sol, iode, dir, file, fig_suff, last_good)
+    end
 end
 
 
@@ -148,23 +175,23 @@ function run_list(iode, name, list, plot_dir = PLOT_DIR, symp_dir = SYMP_DIR;
                     fig_suff = ".png")
 
     for run in list
-        tab, file = run
+        method, file = run
 
-        if length(run) ≥ 3
-            integrator = run[3]
-        else
-            integrator = Integrator
-        end
-        
         write_plots(plot_dir, file, name, fig_suff)
 
-        show(stdout, "text/markdown", Markdown.parse("## $(tab.name)"))
+        # DVRK wraps an inner tableau (e.g. DVRK(Gauss(1))); show it explicitly. All
+        # other methods are shown as `Name(s)` (e.g. VPRKGauss(2), Gauss(2)).
+        headline = method isa DVRK ?
+            "DVRK($(tableau(method).name)($(tableau(method).s)))" :
+            "$(nameof(typeof(method)))($(tableau(method).s))"
+
+        show(stdout, "text/markdown", Markdown.parse("## $(headline)"))
         _linebreak(stdout)
 
         show(stdout, "text/markdown", Markdown.parse("[Plots]($file.md)"))
         _linebreak(stdout)
 
-        run_integrator(iode, tab, integrator, nt, plot_dir, file, fig_suff)
+        run_integrator(iode, method, plot_dir, file, fig_suff)
         show(stdout, "text/markdown", Markdown.parse("![$name]($plot_dir/$file$fig_suff)"))
     end
 
