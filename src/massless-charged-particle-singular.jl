@@ -1,13 +1,13 @@
-module LotkaVolterra2dSingularSRK
+module MasslessChargedParticleSingularSRK
 
     const Δt = 0.1
     const nt = 100000
 
     using GeometricIntegrators
 
-    using GeometricProblems.LotkaVolterra2dSingular
-    # Both Lotka-Volterra gauges share the plot recipes of the standard problem.
-    using GeometricProblems.LotkaVolterra2d: plot_solution, plot_phase_portrait, plot_traces
+    # "Singular" (one-component) vector potential: the form expected by the SRK/DVRK
+    # integrators. The plot recipes are provided by the problem module itself.
+    using GeometricProblems.MasslessChargedParticleSingular
 
     import SrkMethodsForDegenerateLagrangianSystems as SRK
     using SrkMethodsForDegenerateLagrangianSystems: tableaus_vprk_glrk,

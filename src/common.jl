@@ -9,14 +9,21 @@ import GeometricIntegratorsBase
 const GIB = GeometricIntegratorsBase
 using SimpleSolvers: NonlinearSolverException
 
-using GeometricProblems.LotkaVolterra2d: plot_solution, plot_phase_portrait, plot_traces
 using GeometricProblems.Diagnostics: plot_energy_error, plot_energy_drift, plot_constraint_error
+
+
+# Output directories for the figures (and, for symmetry with the SPARK companion package,
+# the symplecticity conditions, which are not computed here).
+const PLOT_DIR = "figures"
+const SYMP_DIR = "symplecticity"
 
 
 # Shared Makie plotting style (kept identical to the SPARK companion package). Larger
 # fonts and thicker lines than the Makie defaults, tuned for the fixed figure sizes of
 # the GeometricProblems plot recipes. Unicode axis labels are selected via `latex=false`
 # on every plot call below.
+# The theme is activated in the module's `__init__` (a `set_theme!` in the module body
+# would only run during precompilation and have no effect at runtime).
 const PLOT_THEME = Theme(
     fontsize = 18,
     Lines    = (linewidth = 2,),
@@ -29,8 +36,6 @@ const PLOT_THEME = Theme(
         titlesize      = 20,
     ),
 )
-
-set_theme!(PLOT_THEME)
 
 
 _linebreak(io) = show(io, "text/markdown", MD(Paragraph([LineBreak()])))
@@ -121,10 +126,27 @@ function write_plots(dir, file, name, fig_suff)
 end
 
 
+# Save the figure produced by `plot` as `<dir>/<file><suffix><fig_suff>`. A failure is
+# reported but not propagated: one diagnostic that cannot be plotted (which happens for
+# runs that crash after very few time steps) must not cost us the remaining figures.
+function _save_plot(plot, dir, file, suffix, fig_suff)
+    try
+        save(dir * "/" * file * suffix * fig_suff, plot())
+    catch ex
+        show(stdout, "text/markdown",
+             Markdown.parse("**Plotting $(file)$(suffix) failed: $(_failure_message(ex)).**"))
+        _linebreak(stdout)
+        @warn("Plotting $(file)$(suffix) failed: $(_failure_message(ex))")
+    end
+end
+
+
 # Plot the solution up to time step `last_good` (`:auto` plots the whole solution). All
 # time-trace panels are limited to `last_good` and share the full-tspan x-axis, so a
 # partial run shows its trajectory up to the crash within the complete time interval.
-function make_plots(sol, equ, dir, file, fig_suff, last_good)
+# `recipes` is a named tuple `(solution, phase_portrait, traces)` of the problem-specific
+# GeometricProblems plot recipes; the remaining diagnostics are problem-agnostic.
+function make_plots(sol, equ, recipes, dir, file, fig_suff, last_good)
     if !isdir(dir)
         mkdir(dir)
     end
@@ -132,29 +154,29 @@ function make_plots(sol, equ, dir, file, fig_suff, last_good)
     nt      = ntime(sol)
     ntplot  = last_good ≥ nt ? (:auto) : last_good
 
-    try
-        # All GeometricProblems recipes set their own x-limits to the plotted time
-        # range, so no post-processing is needed here.
-        save(dir * "/" * file * fig_suff, plot_solution(sol, equ; latex=false, nt=ntplot))
-        save(dir * "/" * file * "_solution" * fig_suff, plot_phase_portrait(sol; latex=false, nt=ntplot))
-        save(dir * "/" * file * "_traces" * fig_suff, plot_traces(sol, equ; latex=false, nt=ntplot))
+    # All GeometricProblems recipes set their own x-limits to the plotted time range, so no
+    # post-processing is needed here.
+    _save_plot(() -> recipes.solution(sol, equ; latex=false, nt=ntplot), dir, file, "", fig_suff)
+    _save_plot(() -> recipes.phase_portrait(sol; latex=false, nt=ntplot), dir, file, "_solution", fig_suff)
+    _save_plot(() -> recipes.traces(sol, equ; latex=false, nt=ntplot), dir, file, "_traces", fig_suff)
+    _save_plot(() -> plot_energy_error(sol; latex=false, nt=ntplot), dir, file, "_energy_error", fig_suff)
 
-        save(dir * "/" * file * "_energy_error" * fig_suff, plot_energy_error(sol; latex=false, nt=ntplot))
+    # Drift is an interval-based diagnostic: `plot_energy_drift` splits the solution into ten
+    # intervals and its `nt` counts those intervals, not time steps. Show only the intervals
+    # completed before a crash – and skip the plot unless at least two of them were
+    # completed, as a single point has no drift to show and a degenerate x-range throws.
+    interval = max(div(nt, 10), 1)
+    ntdrift  = last_good ≥ nt ? (:auto) : div(last_good, interval)
 
-        # Drift is an interval-based diagnostic; only show the intervals before the crash.
-        ntdrift = last_good ≥ nt ? (:auto) : div(last_good, div(nt, 10))
-        save(dir * "/" * file * "_energy_drift" * fig_suff, plot_energy_drift(sol; latex=false, nt=ntdrift))
-
-        save(dir * "/" * file * "_constraint_error" * fig_suff, plot_constraint_error(sol; latex=false, nt=ntplot))
-    catch ex
-        show(stdout, "text/markdown", Markdown.parse("**Plotting failed: $(_failure_message(ex)).**"))
-        _linebreak(stdout)
-        @warn("Plotting failed: $(_failure_message(ex))")
+    if ntdrift === :auto || ntdrift ≥ 2
+        _save_plot(() -> plot_energy_drift(sol; latex=false, nt=ntdrift), dir, file, "_energy_drift", fig_suff)
     end
+
+    _save_plot(() -> plot_constraint_error(sol; latex=false, nt=ntplot), dir, file, "_constraint_error", fig_suff)
 end
 
 
-function run_integrator(iode, method, dir, file, fig_suff)
+function run_integrator(iode, method, recipes, dir, file, fig_suff)
     sol, last_good, err = integrate_partial(iode, method)
 
     if err !== nothing
@@ -166,12 +188,14 @@ function run_integrator(iode, method, dir, file, fig_suff)
 
     # Plot whatever was computed (the trajectory up to the last successful step).
     if last_good ≥ 1
-        make_plots(sol, iode, dir, file, fig_suff, last_good)
+        make_plots(sol, iode, recipes, dir, file, fig_suff, last_good)
     end
 end
 
 
-function run_list(iode, name, list, plot_dir = PLOT_DIR, symp_dir = SYMP_DIR;
+# `recipes` comes first so that the problem modules in `src/<problem>.jl` can bind it with
+# a one-line wrapper `run_list(args...; kwargs...) = SRK.run_list(PLOT_RECIPES, args...; kwargs...)`.
+function run_list(recipes, iode, name, list, plot_dir = PLOT_DIR, symp_dir = SYMP_DIR;
                     fig_suff = ".png")
 
     for run in list
@@ -191,7 +215,7 @@ function run_list(iode, name, list, plot_dir = PLOT_DIR, symp_dir = SYMP_DIR;
         show(stdout, "text/markdown", Markdown.parse("[Plots]($file.md)"))
         _linebreak(stdout)
 
-        run_integrator(iode, method, plot_dir, file, fig_suff)
+        run_integrator(iode, method, recipes, plot_dir, file, fig_suff)
         show(stdout, "text/markdown", Markdown.parse("![$name]($plot_dir/$file$fig_suff)"))
     end
 

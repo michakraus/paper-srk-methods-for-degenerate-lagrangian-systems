@@ -1,8 +1,7 @@
 
 using Test
 using GeometricIntegrators
-using GeometricProblems.LotkaVolterra2d
-using GeometricProblems.LotkaVolterra2d: Δt
+import GeometricProblems
 using SrkMethodsForDegenerateLagrangianSystems
 
 const tableaus = (
@@ -15,20 +14,30 @@ const tableaus = (
 )
 
 const nt = 1
-const iode = iodeproblem(; timestep = Δt, timespan = (0.0, nt * Δt))
 
-for list in tableaus
-    for run in list
-        method, file = run
+# All problem modules export `iodeproblem` and `Δt`, so they are addressed by their module.
+const problems = (
+    GeometricProblems.LotkaVolterra2d,
+    GeometricProblems.MasslessChargedParticleSingular,
+    GeometricProblems.MasslessChargedParticle,
+)
 
-        @test_nowarn begin
-            try
-                integrate(iode, method; f_abstol = 1E-14, f_reltol = 1E-14, max_iterations = 100)
-            catch ex
-                if isa(ex, DomainError)
-                    @warn("DOMAIN ERROR: Integrator crashed")
-                else
-                    throw(ex)
+for problem in problems
+    iode = problem.iodeproblem(; timestep = problem.Δt, timespan = (0.0, nt * problem.Δt))
+
+    for list in tableaus
+        for run in list
+            method, file = run
+
+            @test_nowarn begin
+                try
+                    integrate(iode, method; f_abstol = 1E-14, f_reltol = 1E-14, max_iterations = 100)
+                catch ex
+                    if isa(ex, DomainError)
+                        @warn("DOMAIN ERROR: Integrator crashed")
+                    else
+                        throw(ex)
+                    end
                 end
             end
         end

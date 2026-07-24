@@ -1,17 +1,24 @@
 
-.PHONY: documenter weave
+PROBLEMS = lotka-volterra-2d-singular \
+           lotka-volterra-2d-symmetric \
+           massless-charged-particle-singular \
+           massless-charged-particle-standard
+
+.PHONY: documenter weave $(PROBLEMS) clean
 
 all: weave documenter
 
 documenter: weave
 	julia --color=yes --project=.. make.jl
 
-weave:
-	julia --color=yes --project=.. weave-lotka-volterra-2d-singular.jl
-	julia --color=yes --project=.. weave-lotka-volterra-2d-symmetric.jl
+# The CI workflow instead builds the individual pages of each problem in parallel;
+# see .github/workflows/Documentation.yaml and the usage comment in weave.jl.
+weave: $(PROBLEMS)
+
+$(PROBLEMS):
+	julia --color=yes --project=.. weave.jl $@
 
 clean:
 	rm -Rf build
 	rm -Rf src/*.html
-	rm -Rf src/lotka-volterra-2d-singular
-	rm -Rf src/lotka-volterra-2d-symmetric
+	$(foreach problem,$(PROBLEMS),rm -Rf src/$(problem);)

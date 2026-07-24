@@ -22,6 +22,24 @@ This packages serves to document the examples from the paper *Symplectic Runge-K
 * [Lobatto IIIB-IIIA VPRK Methods](lotka-volterra-2d-symmetric/lotka-volterra-2d-symmetric-vprk-lobatto-ba.md)
 * [Radau IIA VPRK Methods](lotka-volterra-2d-symmetric/lotka-volterra-2d-symmetric-vprk-radau.md)
 
+### Massless Charged Particle (singular vector potential)
+
+* [Symplectic Gauss-Legendre Runge-Kutta Methods](massless-charged-particle-singular/massless-charged-particle-singular-srk.md)
+* [Gauss-Legendre Runge-Kutta Methods](massless-charged-particle-singular/massless-charged-particle-singular-firk.md)
+* [Gauss-Legendre VPRK Methods](massless-charged-particle-singular/massless-charged-particle-singular-vprk-gauss.md)
+* [Lobatto IIIA-IIIB VPRK Methods](massless-charged-particle-singular/massless-charged-particle-singular-vprk-lobatto-ab.md)
+* [Lobatto IIIB-IIIA VPRK Methods](massless-charged-particle-singular/massless-charged-particle-singular-vprk-lobatto-ba.md)
+* [Radau IIA VPRK Methods](massless-charged-particle-singular/massless-charged-particle-singular-vprk-radau.md)
+
+### Massless Charged Particle (standard vector potential)
+
+* [Symplectic Gauss-Legendre Runge-Kutta Methods](massless-charged-particle-standard/massless-charged-particle-standard-srk.md)
+* [Gauss-Legendre Runge-Kutta Methods](massless-charged-particle-standard/massless-charged-particle-standard-firk.md)
+* [Gauss-Legendre VPRK Methods](massless-charged-particle-standard/massless-charged-particle-standard-vprk-gauss.md)
+* [Lobatto IIIA-IIIB VPRK Methods](massless-charged-particle-standard/massless-charged-particle-standard-vprk-lobatto-ab.md)
+* [Lobatto IIIB-IIIA VPRK Methods](massless-charged-particle-standard/massless-charged-particle-standard-vprk-lobatto-ba.md)
+* [Radau IIA VPRK Methods](massless-charged-particle-standard/massless-charged-particle-standard-vprk-radau.md)
+
 ## References
 
 * Michael Kraus. Symplectic Runge-Kutta Methods for Degenerate Lagrangian Systems.

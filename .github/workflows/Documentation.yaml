@@ -1,22 +1,80 @@
 name: Documentation
+
 on:
   - push
+
+# Building all pages takes a while; superseded runs on the same ref are pointless.
+concurrency:
+  group: documentation-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  # One job per weave document: each page integrates its method family over the full
+  # time interval, which is far too much work to run sequentially in a single job.
+  weave:
+    name: ${{ matrix.problem }} (${{ matrix.page }})
     runs-on: ubuntu-latest
+    strategy:
+      # A crashing integrator must not prevent the remaining pages from being built.
+      fail-fast: false
+      matrix:
+        problem:
+          - lotka-volterra-2d-singular
+          - lotka-volterra-2d-symmetric
+          - massless-charged-particle-singular
+          - massless-charged-particle-standard
+        page:
+          - srk
+          - firk
+          - vprk-gauss
+          - vprk-lobatto-ab
+          - vprk-lobatto-ba
+          - vprk-radau
     steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
         with:
           version: '1'
+      - uses: julia-actions/cache@v2
       - name: Install dependencies
         run: julia --project --color=yes -e 'using Pkg; Pkg.instantiate(); Pkg.build(); Pkg.precompile();'
-      - name: Lotka-Volterra 2d (singular)
-        run: julia --project=.. --color=yes weave-lotka-volterra-2d-singular.jl
+      - name: Weave page
+        run: julia --project=.. --color=yes weave.jl ${{ matrix.problem }} ${{ matrix.page }}
         working-directory: docs
-      - name: Lotka-Volterra 2d (symmetric)
-        run: julia --project=.. --color=yes weave-lotka-volterra-2d-symmetric.jl
-        working-directory: docs
+      # Stage the output below a common root, so that the artifacts of all pages merge
+      # back into `docs/src/<problem>/` in the `documenter` job.
+      - name: Stage generated page
+        run: |
+          mkdir -p staging/${{ matrix.problem }}
+          cp -R docs/src/${{ matrix.problem }}/. staging/${{ matrix.problem }}/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pages-${{ matrix.problem }}-${{ matrix.page }}
+          path: staging
+          retention-days: 1
+
+  # Collect the woven pages and figures of all problems, then build and deploy the docs.
+  documenter:
+    name: Documenter
+    needs: weave
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      statuses: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1'
+      - uses: julia-actions/cache@v2
+      - name: Install dependencies
+        run: julia --project --color=yes -e 'using Pkg; Pkg.instantiate(); Pkg.build(); Pkg.precompile();'
+      - name: Collect woven pages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pages-*
+          merge-multiple: true
+          path: docs/src
       - name: Documentation
         run: julia --project=.. --color=yes make.jl
         working-directory: docs
