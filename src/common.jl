@@ -19,12 +19,10 @@ const PLOT_DIR = "figures"
 const SYMP_DIR = "symplecticity"
 
 
-# Shared Makie plotting style (kept identical to the SPARK companion package). Larger
-# fonts and thicker lines than the Makie defaults, tuned for the fixed figure sizes of
-# the GeometricProblems plot recipes. Unicode axis labels are selected via `latex=false`
-# on every plot call below.
-# The theme is activated in the module's `__init__` (a `set_theme!` in the module body
-# would only run during precompilation and have no effect at runtime).
+# Shared Makie plotting style (kept identical to the DVI and SPARK companion packages).
+# Larger fonts and thicker lines than the Makie defaults, tuned for the fixed figure sizes
+# of the GeometricProblems plot recipes. Unicode axis labels are selected via `latex=false`
+# on every plot call below. Activated by the module's `__init__`.
 const PLOT_THEME = Theme(
     fontsize = 18,
     Lines    = (linewidth = 2,),
@@ -88,9 +86,14 @@ end
 # of the last completed step and `err` is `nothing` (success), `:nan` (NaNs in the
 # state), or the caught exception. The steps after `last_good` are padded with the last
 # good state so downstream invariant computations never see uninitialized data.
+#
+# No iteration cap is imposed on the solver: a non-convergent solve is bounded by the
+# stagnation detector of `SimpleSolvers`, which gives up after two consecutive steps that
+# leave the iterate unmoved while the residual is still large. `warn_iterations = 0` drops
+# the bare iteration-count warning, the one solver message that `verbosity` does not gate.
 function integrate_partial(iode, method)
     int     = GIB.GeometricIntegrator(iode, method; f_abstol=1E-14, f_reltol=1E-14,
-                                      max_iterations=100, verbosity=SOLVER_VERBOSITY[])
+                                      verbosity=SOLVER_VERBOSITY[], warn_iterations=0)
     sol     = GIB.Solution(iode)
     solstep = GIB.solutionstep(int, sol[0])
     state   = GIB.current(solstep)
@@ -132,11 +135,10 @@ function _failure_message(err)
 end
 
 
-# Reference a figure, but only if it was actually produced: a run that crashed early has
-# no energy drift data, and one that crashed on the very first step has no figures at
-# all. Referencing them regardless leaves broken images on the page and one
-# `invalid local link/image` warning per figure in the Documenter build. Returns whether
-# the reference was written.
+# Reference a figure, but only if it was actually produced: a run that crashed early has no
+# energy drift data, and one that crashed on the very first step has no figures at all.
+# Referencing them regardless leaves broken images on the page and one `invalid local
+# link/image` warning per figure in the Documenter build. Returns whether it wrote one.
 function _plot_figure_md(file, name, filename)
     isfile(filename) || return false
 
@@ -217,11 +219,10 @@ function make_plots(sol, equ, recipes, dir, file, fig_suff, last_good)
     _save_plot(() -> plot_energy_error(sol; latex=false, nt=ntplot), dir, file, "_energy_error", fig_suff)
 
     # Drift is an interval-based diagnostic: `plot_energy_drift` splits the solution into ten
-    # intervals and its `nt` counts those intervals, not time steps. Show only the intervals
-    # completed before a crash – and skip the plot unless at least two of them were
-    # completed, as a single point has no drift to show and a degenerate x-range throws.
-    # Solutions shorter than ten steps have no intervals at all and make the recipe itself
-    # divide by zero, so they are skipped outright (short runs only happen in local tests).
+    # intervals and its `nt` counts those, not time steps. Show only the intervals completed
+    # before a crash, and skip the plot below two of them: a single point has no drift to
+    # show and its degenerate x-range throws. Solutions shorter than ten steps have no
+    # intervals at all and make the recipe divide by zero (which happens in local tests only).
     interval = max(div(nt, 10), 1)
     ntdrift  = last_good ≥ nt ? (:auto) : div(last_good, interval)
 
@@ -279,8 +280,8 @@ function run_list(recipes, iode, name, list, plot_dir = PLOT_DIR, symp_dir = SYM
         overview = "$plot_dir/$file$fig_suff"
         isfile(overview) && show(stdout, "text/markdown", Markdown.parse("![$name]($overview)"))
 
-        # Each run leaves a set of Makie figures behind; collecting them here keeps the
-        # peak footprint of a list of up to fifty methods within what a CI runner can hold.
+        # Each run leaves a set of Makie figures behind; collecting them here keeps the peak
+        # footprint of a whole method family within what a CI runner can hold.
         GC.gc()
     end
 

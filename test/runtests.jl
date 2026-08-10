@@ -29,8 +29,7 @@ const problems = (
 # the line search from reporting its failures here.
 function integrates(iode, method)
     try
-        integrate(iode, method; f_abstol = 1E-14, f_reltol = 1E-14, max_iterations = 100,
-                                verbosity = 0)
+        integrate(iode, method; f_abstol = 1E-14, f_reltol = 1E-14, verbosity = 0)
     catch ex
         ex isa DomainError || rethrow()
     end
