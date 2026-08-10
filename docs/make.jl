@@ -4,9 +4,9 @@ using GeometricIntegrators
 makedocs(;
     authors="Michael Kraus",
     sitename="Symplectic Runge-Kutta Methods for Degenerate Lagrangian Systems",
-    # Some integrators crash on the degenerate Lagrangian and therefore produce no
-    # figures; their pages reference those (missing) images unconditionally. Downgrade
-    # the resulting broken-link errors to warnings (Documenter ≥ 1 errors by default).
+    # Keep broken references in the generated material non-fatal (Documenter ≥ 1 errors on
+    # them by default): the pages under `docs/src/<problem>/` are written by `run_list`, and
+    # a build in which some integrators crashed should still yield a site to look at.
     warnonly=[:cross_references],
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
