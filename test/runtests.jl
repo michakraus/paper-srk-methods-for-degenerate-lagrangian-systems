@@ -24,10 +24,13 @@ const problems = (
 
 # Integrate a single time step. A `DomainError` is a legitimate outcome for these
 # degenerate Lagrangians – a stage value may leave the domain of the logarithm – and is
-# tolerated; every other exception propagates and fails the test.
+# tolerated; every other exception propagates and fails the test. The suite runs the
+# diverging methods on purpose and only asks whether they raise, so `verbosity = 0` keeps
+# the line search from reporting its failures here.
 function integrates(iode, method)
     try
-        integrate(iode, method; f_abstol = 1E-14, f_reltol = 1E-14, max_iterations = 100)
+        integrate(iode, method; f_abstol = 1E-14, f_reltol = 1E-14, max_iterations = 100,
+                                verbosity = 0)
     catch ex
         ex isa DomainError || rethrow()
     end

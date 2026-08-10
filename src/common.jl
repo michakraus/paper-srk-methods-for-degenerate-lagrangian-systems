@@ -42,17 +42,19 @@ const PLOT_THEME = Theme(
 _linebreak(io) = show(io, "text/markdown", MD(Paragraph([LineBreak()])))
 
 
-# The degenerate Lagrangians make some of the methods diverge. The Newton solver then
-# fails its line search in every iteration of every time step and `SimpleSolvers` emits
-# one warning per failure: in the SPARK companion package this drowned a CI run in 173000
-# of them, 99% of a 174583-line log. The warning cannot be switched off through the solver
-# interface — `NewtonSolver` builds its `Linesearch` without forwarding the option
-# keywords, so the line search always ends up with a default `Options` and
-# `verbosity = 1` — hence we filter it out on the logging side instead, and likewise the
-# equally repetitive tick warnings from the plotting stack. Only the count is reported, by
-# `run_list`.
-const QUIET_LOG_MODULES = (:SimpleSolvers, :PlotUtils, :Makie)
+# The degenerate Lagrangians make some of the methods diverge, and the Newton solver then
+# fails its line search in every iteration of every time step. Those warnings are turned off
+# at the source through `SOLVER_VERBOSITY`, which `SimpleSolvers` shares with its line
+# search. The plotting stack offers no such switch: `PlotUtils` emits one unthrottled
+# `No strict ticks found` per degenerate axis, so its warnings are dropped on the logging
+# side instead and only their count is reported, by `run_list`.
+const QUIET_LOG_MODULES = (:PlotUtils, :Makie)
 const QUIET_LOG_COUNT = Ref(0)
+
+# Solver verbosity used by `integrate_partial`; `quiet_solver_warnings!` drops it to 0 for
+# the weave builds. Interactive sessions keep the default, where the warnings are worth
+# having: `SimpleSolvers` rate-limits them to a handful per session.
+const SOLVER_VERBOSITY = Ref(1)
 
 struct QuietLogger{L<:AbstractLogger} <: AbstractLogger
     parent::L
@@ -71,9 +73,13 @@ Logging.catch_exceptions(logger::QuietLogger) = Logging.catch_exceptions(logger.
 Logging.handle_message(logger::QuietLogger, args...; kwargs...) =
     Logging.handle_message(logger.parent, args...; kwargs...)
 
-# Install the filter. Called by the weave driver, not on load, so that interactive
-# sessions keep the warnings unless they ask for quiet.
-quiet_solver_warnings!() = global_logger(QuietLogger(global_logger()))
+# Turn off the solver warnings and install the filter for the plotting ones. Called by the
+# weave driver, not on load, so that interactive sessions keep the warnings unless they ask
+# for quiet.
+function quiet_solver_warnings!()
+    SOLVER_VERBOSITY[] = 0
+    global_logger(QuietLogger(global_logger()))
+end
 
 
 # Integrate an IODE step-by-step so that a crash (solver failure, singular matrix,
@@ -83,7 +89,8 @@ quiet_solver_warnings!() = global_logger(QuietLogger(global_logger()))
 # state), or the caught exception. The steps after `last_good` are padded with the last
 # good state so downstream invariant computations never see uninitialized data.
 function integrate_partial(iode, method)
-    int     = GIB.GeometricIntegrator(iode, method; f_abstol=1E-14, f_reltol=1E-14, max_iterations=100)
+    int     = GIB.GeometricIntegrator(iode, method; f_abstol=1E-14, f_reltol=1E-14,
+                                      max_iterations=100, verbosity=SOLVER_VERBOSITY[])
     sol     = GIB.Solution(iode)
     solstep = GIB.solutionstep(int, sol[0])
     state   = GIB.current(solstep)
@@ -278,7 +285,7 @@ function run_list(recipes, iode, name, list, plot_dir = PLOT_DIR, symp_dir = SYM
     end
 
     if QUIET_LOG_COUNT[] > 0
-        @info("Suppressed $(QUIET_LOG_COUNT[]) solver/plotting warnings so far (see QUIET_LOG_MODULES)")
+        @info("Suppressed $(QUIET_LOG_COUNT[]) plotting warnings so far (see QUIET_LOG_MODULES)")
     end
 
     nothing
