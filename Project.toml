@@ -1,6 +1,6 @@
 name = "SrkMethodsForDegenerateLagrangianSystems"
 uuid = "869a1a14-8b14-4841-8e43-81a3917c2902"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Michael Kraus"]
 
 [deps]
@@ -11,6 +11,7 @@ GeometricIntegratorsBase = "71212ab4-08a2-48eb-a02b-4cbad0e9c44a"
 GeometricProblems = "18cb22b4-ad41-5c80-9c5f-710df63fbdc9"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
+PoincareInvariants = "26663084-47d3-540f-bd97-40ca743aafa4"
 SimpleSolvers = "36b790f5-6434-4fbe-b711-1f64a1e2f6a2"
 Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 
@@ -19,7 +20,8 @@ CairoMakie = "0.15"
 Documenter = "1"
 GeometricIntegrators = "0.17"
 GeometricIntegratorsBase = "0.5"
-GeometricProblems = "0.8"
+GeometricProblems = "0.8.3"
+PoincareInvariants = "0.5"
 SimpleSolvers = "0.10"
 Weave = "0.10"
 julia = "1.10"

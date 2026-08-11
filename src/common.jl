@@ -12,11 +12,20 @@ using SimpleSolvers: NonlinearSolverException
 
 using GeometricProblems.Diagnostics: plot_energy_error, plot_energy_drift, plot_constraint_error
 
+using PoincareInvariants
+
 
 # Output directories for the figures (and, for symmetry with the SPARK companion package,
 # the symplecticity conditions, which are not computed here).
 const PLOT_DIR = "figures"
 const SYMP_DIR = "symplecticity"
+
+
+# Number of points at which the loop and the surface of the Poincaré invariants are sampled.
+# `FirstFourierPlan` takes any number of loop points; the surface's `SecondChebyshevPlan` samples
+# at Padua points and rounds the count up to the next Padua number, of which 231 = 21·22/2 is one.
+const NLOOP = 200
+const NSURFACE = 231
 
 
 # Shared Makie plotting style (kept identical to the DVI and SPARK companion packages).
@@ -123,6 +132,14 @@ function integrate_partial(iode, method)
     end
 
     (sol, last_good, err)
+end
+
+
+# DVRK wraps an inner tableau (e.g. DVRK(Gauss(1))); show it explicitly. All other methods are
+# shown as `Name(s)` (e.g. VPRKGauss(2), Gauss(2)).
+function _headline(method)
+    method isa DVRK && return "DVRK($(tableau(method).name)($(tableau(method).s)))"
+    return "$(nameof(typeof(method)))($(tableau(method).s))"
 end
 
 
@@ -259,11 +276,7 @@ function run_list(recipes, iode, name, list, plot_dir = PLOT_DIR, symp_dir = SYM
     for run in list
         method, file = run
 
-        # DVRK wraps an inner tableau (e.g. DVRK(Gauss(1))); show it explicitly. All
-        # other methods are shown as `Name(s)` (e.g. VPRKGauss(2), Gauss(2)).
-        headline = method isa DVRK ?
-            "DVRK($(tableau(method).name)($(tableau(method).s)))" :
-            "$(nameof(typeof(method)))($(tableau(method).s))"
+        headline = _headline(method)
 
         show(stdout, "text/markdown", Markdown.parse("## $(headline)"))
         _linebreak(stdout)
@@ -287,6 +300,117 @@ function run_list(recipes, iode, name, list, plot_dir = PLOT_DIR, symp_dir = SYM
 
     if QUIET_LOG_COUNT[] > 0
         @info("Suppressed $(QUIET_LOG_COUNT[]) plotting warnings so far (see QUIET_LOG_MODULES)")
+    end
+
+    nothing
+end
+
+
+# Advect the sampled loop or surface and evaluate the Poincaré invariant along the way.
+#
+# The ensemble is integrated one member at a time through `integrate_partial` rather than with
+# `integrate(::EnsembleProblem, …)`: the methods studied here diverge on purpose, and a single
+# diverging member must cost only its own trajectory, not the whole figure. The result is
+# truncated to the first member that failed, so that no padded state enters the invariant.
+#
+# Returns `(ts, Is, last_good, nt)`, or `nothing` if not one member survived its first step.
+function invariant_error(pinv, iode, method, init)
+    # `PIEnsembleProblem` samples the parameterisation at the points the invariant's plan
+    # prescribes and seeds each member's momentum from the equation's own one-form, which is what
+    # a degenerate Lagrangian needs: the momentum is not free, it is ϑ(q).
+    ensemble = PIEnsembleProblem(iode, pinv, init)
+
+    sols = Vector{Any}(undef, nsamples(ensemble))
+    last_good = typemax(Int)
+
+    for (i, prob) in enumerate(ensemble)
+        sols[i], lg, _ = integrate_partial(prob, method)
+        last_good = min(last_good, lg)
+    end
+
+    last_good ≥ 1 || return nothing
+
+    # `compute!` takes one trajectory per sample point, each a vector of phase space points. These
+    # Lagrangians are degenerate, so the loop and the surface live in the two-dimensional
+    # configuration space alone and only `q` enters; the momentum never does.
+    ts = [sols[begin].t[n] for n in 0:last_good]
+    trajectories = [[sol.q[n] for n in 0:last_good] for sol in sols]
+
+    (ts, compute!(pinv, trajectories, ts, parameters(iode)), last_good, ntime(sols[begin]))
+end
+
+
+# Relative error of a Poincaré invariant over time, in the style of
+# `PoincareInvariants.plot_invariant`: linear axes, scatter, dashed zero line. That function
+# cannot be used directly, as it takes an `EnsembleSolution`, which the per-member integration
+# above deliberately does not build.
+function plot_invariant_error(ts, Is, symbol, title)
+    fig = Figure()
+    ax  = Axis(fig[1, 1]; xlabel = "t", title = title,
+               ylabel = "Relative Error ($(symbol)(t)-$(symbol)(0))/$(symbol)(0)")
+
+    hlines!(ax, [0.0]; color = :gray, linestyle = :dash)
+    scatter!(ax, ts, (Is .- Is[begin]) ./ Is[begin])
+    xlims!(ax, first(ts), last(ts))
+
+    fig
+end
+
+
+# The first and second Poincaré invariant of every method in `list`, over the same time step as
+# the trajectory diagnostics of `run_list` but a much shorter time interval: one run advects a
+# few hundred trajectories instead of one, so the time span is set by the problem module's
+# `nt_poincare` rather than its `nt`.
+#
+# `spec` comes first for the same reason `recipes` does in `run_list`: the problem modules bind it
+# with a one-line wrapper. It is a named tuple `(loop, surface, first, second)` of the problem's
+# phase space parameterisations and invariant constructors, all four supplied by GeometricProblems.
+function run_poincare(spec, iode, name, list, plot_dir = PLOT_DIR;
+                        fig_suff = ".png", nloop = NLOOP, nsurface = NSURFACE)
+
+    isdir(plot_dir) || mkpath(plot_dir)
+
+    # One invariant object for the whole list: it depends on the problem's one- or two-form and on
+    # the number of sample points only, not on the method that advects those points.
+    invariants = (("_poincare_1st", "I₁", spec.first(nloop),     spec.loop),
+                  ("_poincare_2nd", "I₂", spec.second(nsurface), spec.surface))
+
+    for run in list
+        method, file = run
+
+        headline = _headline(method)
+
+        show(stdout, "text/markdown", Markdown.parse("### $(headline)"))
+        _linebreak(stdout)
+
+        for (suffix, symbol, pinv, init) in invariants
+            result = invariant_error(pinv, iode, method, init)
+
+            if result === nothing
+                show(stdout, "text/markdown",
+                     Markdown.parse("**No $(symbol): the ensemble crashed on its first time step.**"))
+                _linebreak(stdout)
+                continue
+            end
+
+            ts, Is, last_good, nt = result
+
+            if last_good < nt
+                show(stdout, "text/markdown",
+                     Markdown.parse("**$(symbol) shown over the first $(last_good) of $(nt) time steps: " *
+                                    "at least one member of the ensemble crashed.**"))
+                _linebreak(stdout)
+            end
+
+            _save_plot(() -> plot_invariant_error(ts, Is, symbol, headline),
+                       plot_dir, file, suffix, fig_suff)
+
+            _plot_figure_md(stdout, name, "$plot_dir/$file$suffix$fig_suff")
+        end
+
+        # One ensemble of a few hundred solutions per method, plus two figures; collecting them
+        # here keeps the peak footprint within what a CI runner can hold.
+        GC.gc()
     end
 
     nothing

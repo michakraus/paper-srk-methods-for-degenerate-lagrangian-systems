@@ -3,3 +3,23 @@
 ```julia
 run_list(iodeproblem(timestep = Δt, timespan = (0.0, Δt * nt)), :TableauFIRK, tableaus_srk_glrk())
 ```
+
+## Poincaré Invariants
+
+Relative error of the first and the second Poincaré invariant,
+
+```math
+I_{1} = \oint_{\gamma} \vartheta_{i} (q) \, dq^{i}
+\qquad \text{and} \qquad
+I_{2} = \int_{S} \omega_{ij} (q) \, dq^{i} \wedge dq^{j} ,
+```
+
+over a loop and a surface in configuration space advected by each of the methods above — the
+problem's own `f_loop` and `f_surface`. The surface lies inside the loop but is not the region the
+loop bounds, so the two are different numbers rather than two estimates of one. The time step is
+that of the example above; the time interval is much shorter, since one run advects a few hundred
+trajectories instead of one.
+
+```julia
+run_poincare(iodeproblem(timestep = Δt, timespan = (0.0, Δt * nt_poincare)), :TableauFIRK, tableaus_srk_glrk())
+```

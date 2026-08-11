@@ -14,8 +14,9 @@ module SrkMethodsForDegenerateLagrangianSystems
            tableaus_srk_glrk,
            tableaus_firk_glrk
 
-    # `run_list` is deliberately *not* exported: every problem module in `src/<problem>.jl`
-    # defines its own three-argument `run_list` that binds the problem's plot recipes, and
-    # scripts commonly `using` both this package and a problem module.
+    # `run_list` and `run_poincare` are deliberately *not* exported: every problem module in
+    # `src/<problem>.jl` defines its own wrappers, which bind the problem's plot recipes and its
+    # phase space parameterisations, and scripts commonly `using` both this package and a problem
+    # module.
 
 end
