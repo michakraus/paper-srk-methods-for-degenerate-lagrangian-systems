@@ -16,9 +16,12 @@ I_{2} = \int_{S} \omega_{ij} (q) \, dq^{i} \wedge dq^{j} ,
 
 over a loop and a surface in configuration space advected by each of the methods above — the
 problem's own `f_loop` and `f_surface`. The surface lies inside the loop but is not the region the
-loop bounds, so the two are different numbers rather than two estimates of one. The time step is
-that of the example above; the time interval is much shorter, since one run advects a few hundred
-trajectories instead of one.
+loop bounds, so the two are different numbers rather than two estimates of one.
+
+Both use the time step of the example above, over much shorter intervals, since one run advects a
+few hundred trajectories instead of one. The second invariant runs shorter still: its quadrature
+interpolates the advected surface, which the flow shears, so beyond the interval shown the figure
+would report the quadrature failing rather than the method.
 
 ```julia
 run_poincare(iodeproblem(timestep = Δt, timespan = (0.0, Δt * nt_poincare)), :TableauVPRK, tableaus_vprk_radau())

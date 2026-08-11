@@ -22,10 +22,26 @@ const SYMP_DIR = "symplecticity"
 
 
 # Number of points at which the loop and the surface of the Poincaré invariants are sampled.
-# `FirstFourierPlan` takes any number of loop points; the surface's `SecondChebyshevPlan` samples
-# at Padua points and rounds the count up to the next Padua number, of which 231 = 21·22/2 is one.
+# `FirstFourierPlan` takes any number of loop points; the surface's `SecondChebyshevPlan` samples at
+# Padua points and rounds the count up to the next Padua number, so 500 becomes 528 = 32·33/2.
 const NLOOP = 200
-const NSURFACE = 231
+const NSURFACE = 500
+
+# The second invariant is evaluated over a shorter time interval than the first.
+#
+# Its Chebyshev quadrature interpolates the *advected* surface, which the flow shears, and the
+# polynomial degree needed to resolve that grows linearly with the time span. Measured on
+# Lotka-Volterra 2d with `DVRK(Gauss(2))`, the invariant stays at the integrator's own error until
+# t ≈ 25 at 231 points, t ≈ 44 at 528 and t ≈ 62 at 861; past that the figure shows the quadrature
+# failing rather than the method, and it does so identically for every method in a family, which is
+# how one tells the two apart. The first invariant has no such limit: a Fourier plan on a closed
+# loop holds ~1e-13 over the full t = 100.
+#
+# Refining instead of shortening does not pay. Points grow as the square of the horizon and cost as
+# their product, so converged coverage costs time ∝ T³: t = 100 would need some 2350 points and ten
+# times the runtime of the whole diagnostic as it stands, to display a curve that is flat at 1e-13
+# the entire way.
+const T_POINCARE_2ND = 40.0
 
 
 # Shared Makie plotting style (kept identical to the DVI and SPARK companion packages).
@@ -340,6 +356,18 @@ function invariant_error(pinv, iode, method, init)
 end
 
 
+# Restrict a problem to the first `T` units of its time interval, keeping its time step, so that
+# the two invariants of a run can be evaluated over different spans. `nothing` leaves the problem
+# alone, and so does a `T` the problem does not reach — which is what keeps the short runs of the
+# test suite intact.
+_horizon(prob, ::Nothing) = prob
+
+function _horizon(prob, T)
+    t₀, t₁ = timespan(prob)
+    T ≥ t₁ - t₀ ? prob : similar(prob; timespan = (t₀, t₀ + T))
+end
+
+
 # Relative error of a Poincaré invariant over time, in the style of
 # `PoincareInvariants.plot_invariant`: linear axes, scatter, dashed zero line. That function
 # cannot be used directly, as it takes an `EnsembleSolution`, which the per-member integration
@@ -366,14 +394,17 @@ end
 # with a one-line wrapper. It is a named tuple `(loop, surface, first, second)` of the problem's
 # phase space parameterisations and invariant constructors, all four supplied by GeometricProblems.
 function run_poincare(spec, iode, name, list, plot_dir = PLOT_DIR;
-                        fig_suff = ".png", nloop = NLOOP, nsurface = NSURFACE)
+                        fig_suff = ".png", nloop = NLOOP, nsurface = NSURFACE,
+                        t_2nd = T_POINCARE_2ND)
 
     isdir(plot_dir) || mkpath(plot_dir)
 
     # One invariant object for the whole list: it depends on the problem's one- or two-form and on
-    # the number of sample points only, not on the method that advects those points.
-    invariants = (("_poincare_1st", "I₁", spec.first(nloop),     spec.loop),
-                  ("_poincare_2nd", "I₂", spec.second(nsurface), spec.surface))
+    # the number of sample points only, not on the method that advects those points. The last
+    # element is the time interval to evaluate it over, `nothing` meaning the problem's own; see
+    # `T_POINCARE_2ND` for why the second invariant gets a shorter one.
+    invariants = (("_poincare_1st", "I₁", spec.first(nloop),     spec.loop,    nothing),
+                  ("_poincare_2nd", "I₂", spec.second(nsurface), spec.surface, t_2nd))
 
     for run in list
         method, file = run
@@ -383,8 +414,8 @@ function run_poincare(spec, iode, name, list, plot_dir = PLOT_DIR;
         show(stdout, "text/markdown", Markdown.parse("### $(headline)"))
         _linebreak(stdout)
 
-        for (suffix, symbol, pinv, init) in invariants
-            result = invariant_error(pinv, iode, method, init)
+        for (suffix, symbol, pinv, init, horizon) in invariants
+            result = invariant_error(pinv, _horizon(iode, horizon), method, init)
 
             if result === nothing
                 show(stdout, "text/markdown",
