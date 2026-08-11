@@ -23,29 +23,38 @@ const SYMP_DIR = "symplecticity"
 
 # Number of points at which the loop and the surface of the Poincaré invariants are sampled.
 # `FirstFourierPlan` takes any number of loop points; the surface's `SecondChebyshevPlan` samples at
-# Padua points and rounds the count up to the next Padua number, of which 231 = 21·22/2 is one.
+# Padua points and rounds the count up to the next Padua number, of which 351 = 26·27/2 is one.
 const NLOOP = 200
-const NSURFACE = 231
+const NSURFACE = 351
 
 # The second invariant is evaluated over a shorter time interval than the first.
 #
 # Its Chebyshev quadrature interpolates the *advected* surface, which the flow shears, and the
 # polynomial degree needed to resolve that grows with the time span. Past the point where the degree
 # no longer suffices, the figure reports the quadrature failing rather than the method — and it does
-# so identically for every method in a family, which is how one tells the two apart.
+# so identically for every method in a family, however far apart their accuracy, which is how one
+# tells the two apart.
 #
 # Where that point lies has to be measured against a *refined reference*, not against a fixed
-# tolerance: these methods conserve the invariant to some 5e-13, so quadrature noise becomes visible
-# long before it reaches any absolute threshold one might pick, and picking one overestimates the
-# usable span by half again. Measured on Lotka-Volterra 2d with `DVRK(Gauss(6))`, comparing 231
-# points against a converged 1891: the coarse curve tracks the truth to within 10% up to t ≈ 15 and
-# overshoots it 4.8× by t = 20. At 528 points the limit moves out to t ≈ 30. The interval below
-# therefore carries the trend faithfully but shows some scatter over its last few units.
+# tolerance: these methods conserve the invariant to some 3e-13, so quadrature noise becomes visible
+# long before it reaches any absolute threshold one might pick, and using one overestimates the
+# usable span by half again. The count above is the smallest that carries t = 20 cleanly. Measured
+# on the singular Lotka-Volterra gauge — the most demanding of the four problems, its own error
+# being the smallest — against a converged 1891 points, as the ratio of the two maximum relative
+# errors over the interval:
+#
+#     points   231    253    276    300    325    351
+#     Gauss(6) 4.79   1.32   1.00   0.84   1.10   1.00
+#     Gauss(1) 2.66   2.05   1.20   1.42   0.97   1.00
+#
+# From 276 on, what is left is fluctuation at the 1e-13 floor rather than quadrature error; 351 is
+# taken for margin. The massless charged particle needs less — its own error is 8e-11, so noise at
+# 1e-13 never shows — and 231 already sits at 1.2 there.
 #
 # The first invariant has no such limit: a Fourier plan on a closed loop holds ~1e-13 over the full
-# t = 100. Refining the surface rather than shortening its interval does not pay — the points needed
-# grow faster than the horizon and cost as their product, so covering t = 100 would take some 2350
-# points and roughly ten times the runtime of the whole diagnostic.
+# t = 100. Extending the surface instead is what does not pay — the points needed grow faster than
+# the horizon and cost as their product, so covering t = 100 would take some 2350 points and roughly
+# ten times the runtime of the whole diagnostic.
 const T_POINCARE_2ND = 20.0
 
 
