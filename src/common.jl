@@ -23,25 +23,30 @@ const SYMP_DIR = "symplecticity"
 
 # Number of points at which the loop and the surface of the Poincaré invariants are sampled.
 # `FirstFourierPlan` takes any number of loop points; the surface's `SecondChebyshevPlan` samples at
-# Padua points and rounds the count up to the next Padua number, so 500 becomes 528 = 32·33/2.
+# Padua points and rounds the count up to the next Padua number, of which 231 = 21·22/2 is one.
 const NLOOP = 200
-const NSURFACE = 500
+const NSURFACE = 231
 
 # The second invariant is evaluated over a shorter time interval than the first.
 #
 # Its Chebyshev quadrature interpolates the *advected* surface, which the flow shears, and the
-# polynomial degree needed to resolve that grows linearly with the time span. Measured on
-# Lotka-Volterra 2d with `DVRK(Gauss(2))`, the invariant stays at the integrator's own error until
-# t ≈ 25 at 231 points, t ≈ 44 at 528 and t ≈ 62 at 861; past that the figure shows the quadrature
-# failing rather than the method, and it does so identically for every method in a family, which is
-# how one tells the two apart. The first invariant has no such limit: a Fourier plan on a closed
-# loop holds ~1e-13 over the full t = 100.
+# polynomial degree needed to resolve that grows with the time span. Past the point where the degree
+# no longer suffices, the figure reports the quadrature failing rather than the method — and it does
+# so identically for every method in a family, which is how one tells the two apart.
 #
-# Refining instead of shortening does not pay. Points grow as the square of the horizon and cost as
-# their product, so converged coverage costs time ∝ T³: t = 100 would need some 2350 points and ten
-# times the runtime of the whole diagnostic as it stands, to display a curve that is flat at 1e-13
-# the entire way.
-const T_POINCARE_2ND = 40.0
+# Where that point lies has to be measured against a *refined reference*, not against a fixed
+# tolerance: these methods conserve the invariant to some 5e-13, so quadrature noise becomes visible
+# long before it reaches any absolute threshold one might pick, and picking one overestimates the
+# usable span by half again. Measured on Lotka-Volterra 2d with `DVRK(Gauss(6))`, comparing 231
+# points against a converged 1891: the coarse curve tracks the truth to within 10% up to t ≈ 15 and
+# overshoots it 4.8× by t = 20. At 528 points the limit moves out to t ≈ 30. The interval below
+# therefore carries the trend faithfully but shows some scatter over its last few units.
+#
+# The first invariant has no such limit: a Fourier plan on a closed loop holds ~1e-13 over the full
+# t = 100. Refining the surface rather than shortening its interval does not pay — the points needed
+# grow faster than the horizon and cost as their product, so covering t = 100 would take some 2350
+# points and roughly ten times the runtime of the whole diagnostic.
+const T_POINCARE_2ND = 20.0
 
 
 # Shared Makie plotting style (kept identical to the DVI and SPARK companion packages).
