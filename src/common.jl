@@ -51,6 +51,10 @@ const NSURFACE = 351
 # taken for margin. The massless charged particle needs less — its own error is 8e-11, so noise at
 # 1e-13 never shows — and 231 already sits at 1.2 there.
 #
+# The sharper test is pointwise, since matching maxima do not imply matching curves: against the
+# same reference, over the same interval, 351 points deviate by 8.8% of the curve's amplitude where
+# 231 deviate by 393%. The coarse curve was not merely too large, it was a different shape.
+#
 # The first invariant has no such limit: a Fourier plan on a closed loop holds ~1e-13 over the full
 # t = 100. Extending the surface instead is what does not pay — the points needed grow faster than
 # the horizon and cost as their product, so covering t = 100 would take some 2350 points and roughly
