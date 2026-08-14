@@ -1,6 +1,6 @@
 name = "SrkMethodsForDegenerateLagrangianSystems"
 uuid = "869a1a14-8b14-4841-8e43-81a3917c2902"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["Michael Kraus"]
 
 [deps]
@@ -18,11 +18,14 @@ Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 [compat]
 CairoMakie = "0.15"
 Documenter = "1"
-GeometricIntegrators = "0.17"
-GeometricIntegratorsBase = "0.5"
+# These three move together: GeometricIntegrators 0.18 requires GeometricIntegratorsBase 0.6, which
+# requires SimpleSolvers 0.11. 0.6 adds `f_stall_window = 50` to `default_options` and merges it
+# into whatever `integrate_partial` passes; see the note above that function in `src/common.jl`.
+GeometricIntegrators = "0.18"
+GeometricIntegratorsBase = "0.6"
 GeometricProblems = "0.8.3"
 PoincareInvariants = "0.5"
-SimpleSolvers = "0.10"
+SimpleSolvers = "0.11"
 Weave = "0.10"
 julia = "1.10"
 

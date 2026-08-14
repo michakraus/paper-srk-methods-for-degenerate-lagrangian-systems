@@ -132,8 +132,18 @@ end
 #
 # No iteration cap is imposed on the solver: a non-convergent solve is bounded by the
 # stagnation detector of `SimpleSolvers`, which gives up after two consecutive steps that
-# leave the iterate unmoved while the residual is still large. `warn_iterations = 0` drops
-# the bare iteration-count warning, the one solver message that `verbosity` does not gate.
+# leave the iterate unmoved while the residual is still large, and — since
+# `GeometricIntegratorsBase` 0.6 — by its `f_stall_window = 50`, which gives up on a solve that
+# spends fifty iterations without halving its residual. That one arrives through the merge in
+# `GeometricIntegratorsBase/src/integrator.jl:47`, so it applies here without being asked for.
+# `warn_iterations = 0` drops the bare iteration-count warning, the one solver message that
+# `verbosity` does not gate.
+#
+# `f_stall_window` moves exactly one of this package's runs (measured at the pages' own Δt = 0.1,
+# over all 90 runs): `vprk_lobatto_IIIA_IIIB3` on `LotkaVolterra2d` stops after 43 steps with
+# NaNs where it used to reach 62 and report a solver error. The other five runs that end early
+# there — `vprk_lobatto_IIIA_IIIB{2,4,5}` at 27/68/116 steps, `vprk_lobatto_IIIB_IIIA3` at 572
+# and `srk_gauss1` at 66 — are unchanged, as is every run that completes.
 function integrate_partial(iode, method)
     int     = GIB.GeometricIntegrator(iode, method; f_abstol=1E-14, f_reltol=1E-14,
                                       verbosity=SOLVER_VERBOSITY[], warn_iterations=0)
