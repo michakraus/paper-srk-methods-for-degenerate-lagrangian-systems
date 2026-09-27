@@ -23,7 +23,7 @@ Documenter = "1"
 # into whatever `integrate_partial` passes; see the note above that function in `src/common.jl`.
 GeometricIntegrators = "0.18"
 GeometricIntegratorsBase = "0.6"
-GeometricProblems = "0.8.3"
+GeometricProblems = "0.8.3, 0.9"
 Logging = "1"
 Markdown = "1"
 PoincareInvariants = "0.5"
