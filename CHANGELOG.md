@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The test dependencies are in `test/Project.toml`, not in `[extras]` and `[targets]` of
   `Project.toml`. GeometricIntegrators and GeometricProblems take the root's `[compat]` bounds.
 - `test/runtests.jl` holds only a `core` group of `@safetestset` files. Its two inline testsets
-  moved, with the same assertions, into `test/tableau_lists.jl` (one time step with every tableau list) and
-  `test/common.jl` (the Poincaré invariants of `run_poincare`).
+  moved, with the same assertions, into `test/tableau_lists.jl` (one time step with every
+  tableau list) and `test/common.jl` (the Poincaré invariants of `run_poincare`).
 - `test/test_scripts.jl`, which held no test and which the suite never ran, moved unchanged to
   `scripts/test_scripts.jl`.
