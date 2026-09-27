@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `test/quality/aqua.jl` runs the Aqua checks. The stale-dependency check is `@test_broken`,
   issue #1: Documenter and Weave are in `[deps]`, and nothing under `src/` loads them.
 - `[compat]` entries `Logging = "1"` and `Markdown = "1"`, which Aqua's compat check requires.
+- Dependabot opens the `[compat]` bumps, weekly, in `/`, `/docs` and `/test`, and ignores the
+  standard libraries. `test/Project.toml` has no bound for Aqua and SafeTestsets, so its first run
+  opens a pull request for each.
+- `codecov.yml` sets the project and patch checks to a 1 % threshold.
 
 ### Changed
 
@@ -26,7 +30,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   and `nightly` as advisory jobs. Coverage is uploaded from the `min` Linux job only. The `lts`
   alias gives way to `min`, and the job names change with it, so the required checks of branch
   protection can be one fixed list across all repositories.
+- CI runs on a push to `main` or `master`, on tags, on pull requests and on manual dispatch. It ran
+  on every push to any branch, so a push to a topic branch without a pull request runs no CI.
+- A new `Doctests - ubuntu-latest` job skips itself here, because the repository has no
+  `docs/Project.toml`.
 - The documentation workflow is `Documenter.yml`, formerly `Documentation.yaml`. The weave
-  pipeline is unchanged; only the action versions move to the current majors.
-- Dependabot opens the `[compat]` bumps, weekly, and ignores the standard libraries. `codecov.yml`
-  sets the project and patch checks to a 1 % threshold.
+  pipeline is unchanged; only the action versions move to the current majors. The comment in
+  `docs/Makefile` names the new file.
