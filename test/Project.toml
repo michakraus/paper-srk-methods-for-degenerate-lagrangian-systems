@@ -7,6 +7,7 @@ SrkMethodsForDegenerateLagrangianSystems = "869a1a14-8b14-4841-8e43-81a3917c2902
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
+Aqua = "0.8.18"
 GeometricIntegrators = "0.18"
 GeometricProblems = "0.8.3, 0.9"
 SafeTestsets = "0.1.0"
