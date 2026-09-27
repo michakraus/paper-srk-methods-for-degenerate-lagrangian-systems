@@ -44,14 +44,14 @@ jobs:
           - vprk-lobatto-ba
           - vprk-radau
     steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v2
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
         with:
           version: '1'
       # All jobs of this workflow share one depot cache: the default cache name includes
       # the job name and the matrix values, which would give us one near-identical cache
       # per matrix cell and a cold cache in the `documenter` job.
-      - uses: julia-actions/cache@v2
+      - uses: julia-actions/cache@v3
         with:
           cache-name: julia-cache;workflow=${{ github.workflow }}
           include-matrix: false
@@ -66,7 +66,7 @@ jobs:
         run: |
           mkdir -p staging/${{ matrix.problem }}
           cp -R docs/src/${{ matrix.problem }}/. staging/${{ matrix.problem }}/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: pages-${{ matrix.problem }}-${{ matrix.page }}
           path: staging
@@ -85,17 +85,17 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v2
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
         with:
           version: '1'
-      - uses: julia-actions/cache@v2
+      - uses: julia-actions/cache@v3
         with:
           cache-name: julia-cache;workflow=${{ github.workflow }}
       - name: Install dependencies
         run: julia --project --color=yes -e 'using Pkg; Pkg.instantiate(); Pkg.precompile();'
       - name: Collect woven pages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: pages-*
           merge-multiple: true
@@ -113,7 +113,7 @@ jobs:
       # Nothing was deployed in that case, so keep the site around for inspection.
       - name: Upload site of the incomplete build
         if: ${{ always() && needs.weave.result != 'success' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: documenter-site
           path: docs/build
