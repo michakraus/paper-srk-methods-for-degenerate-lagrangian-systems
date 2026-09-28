@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   issue #1: Documenter and Weave are in `[deps]`, and nothing under `src/` loads them.
 - `[compat]` entries `Logging = "1"` and `Markdown = "1"`, which Aqua's compat check requires.
 - Dependabot opens the `[compat]` bumps, weekly, for the root `Project.toml` only, and ignores the
-  standard libraries. The bounds in `test/Project.toml` and `docs/Project.toml` are not bumped.
+  standard libraries. The bounds in `test/Project.toml` are not bumped.
 - `codecov.yml` sets the project and patch checks to a 1 % threshold.
 - An advisory `Downgrade - ubuntu-latest` job tests the `[compat]` lower bounds. It resolves each
   direct dependency of the root `Project.toml` to its lower bound on the lowest Julia and runs the
