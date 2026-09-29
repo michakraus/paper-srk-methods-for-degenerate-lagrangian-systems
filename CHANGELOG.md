@@ -27,11 +27,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   GeometricProblems 0.8.3 needs DocStringExtensions 0.9 through Symbolics 7. Compat-only; no
   behaviour changes.
 - The test dependencies are in `test/Project.toml`, not in `[extras]` and `[targets]` of
-  `Project.toml`.
-- `test/Project.toml` loses its `[compat]` entries `GeometricIntegrators = "0.18.1"` and
-  `GeometricProblems = "0.8.3, 0.9"`. The test convention gives a dependency of the root
-  `Project.toml` no `[compat]` entry in `test/Project.toml`, so the root's bounds alone apply.
-  The bounds were equal to the root's, so the resolved versions do not change.
+  `Project.toml`. GeometricIntegrators and GeometricProblems, which are dependencies of the root,
+  have no `[compat]` entry in `test/Project.toml`, so the root's bounds apply.
 - `test/runtests.jl` holds only a `core` group of `@safetestset` files. Its two inline testsets
   moved, with the same assertions, into `test/tableau_lists.jl` (one time step with every
   tableau list) and `test/common.jl` (the Poincaré invariants of `run_poincare`).
