@@ -24,8 +24,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   GeometricProblems 0.9.1, PoincareInvariants 0.5.1 and SimpleSolvers 0.14.1, because
   GeometricBase 0.15 declares its stubs public and requires Julia 1.11.
 - The Weave floor rises to `"0.10.11"`: up to 0.10.10 it caps Highlights at 0.4, and so
-  DocStringExtensions at 0.8, while GeometricProblems 0.8.3 needs DocStringExtensions 0.9 through
-  Symbolics 7. Compat-only; no behaviour changes.
+  DocStringExtensions at 0.8, while GeometricProblems 0.9.1 needs DocStringExtensions 0.9 through
+  EulerLagrange 0.5.2 and Symbolics 7. Compat-only; no behaviour changes.
 - The test dependencies are in `test/Project.toml`, not in `[extras]` and `[targets]` of
   `Project.toml`. GeometricIntegrators and GeometricProblems, which are dependencies of the root,
   have no `[compat]` entry in `test/Project.toml`, so the root's bounds apply.
