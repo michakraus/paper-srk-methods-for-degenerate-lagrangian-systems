@@ -36,8 +36,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `scripts/test_scripts.jl`.
 - CI runs the shared workflow of the other experiment and package repositories. The test matrix is
   Julia `min` (the `[compat] julia` floor, 1.10) and `1` on Linux, macOS and Windows, with `pre`
-  and `nightly` as advisory jobs. Coverage is uploaded from the `min` Linux job only. The `lts`
-  alias gives way to `min`, and the job names change with it, so the required checks of branch
+  and `nightly` as advisory jobs. Coverage is uploaded from the `1` Linux job only, and a test job
+  saves the Julia cache only when it succeeds. The `lts` alias gives way to `min`, and the job names change with it, so the required checks of branch
   protection can be one fixed list across all repositories.
 - CI runs on a push to `main` or `master`, on tags, on pull requests and on manual dispatch. It ran
   on every push to any branch, so a push to a topic branch without a pull request runs no CI.
