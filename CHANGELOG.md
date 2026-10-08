@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- CI uploads coverage from the `Julia 1 - ubuntu-latest` job instead of `Julia min`, and a test
+  job saves the Julia cache only when it succeeds.
 - Two `[compat]` floors rise so that every floor resolves together on Julia 1.10.
   GeometricIntegrators is `"0.18.1"` in `Project.toml`: 0.18.0 requires
   GeometricIntegratorsBase 0.5 and SimpleSolvers 0.10, below the floors 0.6 and 0.11. Weave is
