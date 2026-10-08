@@ -20,8 +20,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- CI uploads coverage from the `Julia 1 - ubuntu-latest` job instead of `Julia min`, and a test
-  job saves the Julia cache only when it succeeds.
 - Two `[compat]` floors rise so that every floor resolves together on Julia 1.10.
   GeometricIntegrators is `"0.18.1"` in `Project.toml`: 0.18.0 requires
   GeometricIntegratorsBase 0.5 and SimpleSolvers 0.10, below the floors 0.6 and 0.11. Weave is
@@ -38,8 +36,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `scripts/test_scripts.jl`.
 - CI runs the shared workflow of the other experiment and package repositories. The test matrix is
   Julia `min` (the `[compat] julia` floor, 1.10) and `1` on Linux, macOS and Windows, with `pre`
-  and `nightly` as advisory jobs. Coverage is uploaded from the `min` Linux job only. The `lts`
-  alias gives way to `min`, and the job names change with it, so the required checks of branch
+  and `nightly` as advisory jobs. Coverage is uploaded from the `1` Linux job only, and a test job
+  saves the Julia cache only when it succeeds. The `lts` alias gives way to `min`, and the job names change with it, so the required checks of branch
   protection can be one fixed list across all repositories.
 - CI runs on a push to `main` or `master`, on tags, on pull requests and on manual dispatch. It ran
   on every push to any branch, so a push to a topic branch without a pull request runs no CI.
