@@ -8,7 +8,8 @@ Aqua.test_all(
     stale_deps = false,  # issue #1: run as @test_broken below
     # CairoMakie is a direct dependency, so on Julia 1.11 the check's `Pkg.precompile` also builds
     # the Makie extensions of PoincareInvariants and GeometricProblems after the package loads.
-    # On 1.11.9, `tmax = 30` timed out after 43-47 s; `tmax = 300` returned `false` after 59-174 s.
+    # On 1.11.9 the check fails with `tmax = 30` after 43-47 s and passes with `tmax = 300` after
+    # 59-174 s.
     persistent_tasks = (; tmax = 300)
 )
 

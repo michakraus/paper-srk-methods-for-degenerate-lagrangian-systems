@@ -18,7 +18,8 @@ Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 [compat]
 CairoMakie = "0.15"
 Documenter = "1"
-# These five move together: each bound is the first release of its package that requires
+# GeometricIntegrators, GeometricIntegratorsBase, GeometricProblems, PoincareInvariants and
+# SimpleSolvers move together: each bound is the first release of its package that requires
 # GeometricBase 0.15, directly or through its dependencies.
 # GeometricIntegratorsBase 0.6 adds `f_stall_window = 50` to `default_options` and merges it into
 # whatever `integrate_partial` passes; see the note above that function in `src/common.jl`.
