@@ -20,14 +20,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- The floors rise to Julia 1.11, GeometricIntegrators 0.18.6, GeometricIntegratorsBase 0.6.9,
+- The floors rise to GeometricIntegrators 0.18.6, GeometricIntegratorsBase 0.6.9,
   GeometricProblems 0.9.1, PoincareInvariants 0.5.1 and SimpleSolvers 0.14.1, because
   GeometricBase 0.15 declares its stubs public and requires Julia 1.11.
 - **Julia 1.12 is the floor** (`[compat] julia = "1.12"`, from 1.11). A caller on Julia 1.11 can
   no longer install this version. The repository records no reason for 1.12. The Aqua
-  persistent-tasks check in `test/quality/aqua.jl` lost its `tmax = 300` override: on 1.11.9 it
-  failed with Aqua's default of 30 s, and on 1.12.7 it passes with it. Nothing else in the code
-  or the tests changes.
+  persistent-tasks check in `test/quality/aqua.jl` lost its `tmax = 300` override, which existed
+  because the wait for the precompile process to exit after the package has loaded exceeded
+  Aqua's default of 30 s on 1.11.9. On 1.12.7 that wait finishes in under a second, and `tmax`
+  bounds nothing else: the load phase itself is unbounded, so the default suffices on every
+  supported Julia. Nothing else in the code or the tests changes.
 - The Weave floor rises to `"0.10.11"`: up to 0.10.10 it caps Highlights at 0.4, and so
   DocStringExtensions at 0.8, while GeometricProblems 0.9.1 needs DocStringExtensions 0.9 through
   EulerLagrange 0.5.2 and Symbolics 7. Compat-only; no behaviour changes.
