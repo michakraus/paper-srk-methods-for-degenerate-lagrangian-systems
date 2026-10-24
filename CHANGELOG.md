@@ -23,6 +23,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The floors rise to Julia 1.11, GeometricIntegrators 0.18.6, GeometricIntegratorsBase 0.6.9,
   GeometricProblems 0.9.1, PoincareInvariants 0.5.1 and SimpleSolvers 0.14.1, because
   GeometricBase 0.15 declares its stubs public and requires Julia 1.11.
+- **Julia 1.12 is the floor** (`[compat] julia = "1.12"`, from 1.11). A caller on Julia 1.11 can
+  no longer install this version. The repository records no reason for 1.12. The Aqua
+  persistent-tasks check in `test/quality/aqua.jl` lost its `tmax = 300` override: on 1.11.9 it
+  failed with Aqua's default of 30 s, and on 1.12.7 it passes with it. Nothing else in the code
+  or the tests changes.
 - The Weave floor rises to `"0.10.11"`: up to 0.10.10 it caps Highlights at 0.4, and so
   DocStringExtensions at 0.8, while GeometricProblems 0.9.1 needs DocStringExtensions 0.9 through
   EulerLagrange 0.5.2 and Symbolics 7. Compat-only; no behaviour changes.
@@ -35,7 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `test/test_scripts.jl`, which held no test and which the suite never ran, moved unchanged to
   `scripts/test_scripts.jl`.
 - CI runs the shared workflow of the other experiment and package repositories. The test matrix is
-  Julia `min` (the `[compat] julia` floor, 1.11) and `1` on Linux, macOS and Windows, with `pre`
+  Julia `min` (the `[compat] julia` floor, 1.12) and `1` on Linux, macOS and Windows, with `pre`
   and `nightly` as advisory jobs. Coverage is uploaded from the `1` Linux job only, and a test job
   saves the Julia cache only when it succeeds. The `lts` alias gives way to `min`, and the job names change with it, so the required checks of branch
   protection can be one fixed list across all repositories.
