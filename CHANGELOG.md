@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - An advisory `Downgrade - ubuntu-latest` job tests the `[compat]` lower bounds. It resolves each
   direct dependency of the root `Project.toml` to its lower bound on the lowest Julia and runs the
   suite there. It is not a required check.
+- `.gitignore` ignores `figures/` at any depth, the default plot directory of `run_list` and
+  `run_poincare`. A driver run from the repository root no longer leaves an untracked `figures/`
+  directory.
 
 ### Changed
 
