@@ -24,7 +24,7 @@ Documenter = "1"
 # GeometricIntegratorsBase 0.6 adds `f_stall_window = 50` to `default_options` and merges it into
 # whatever `integrate_partial` passes; see the note above that function in `src/common.jl`.
 GeometricIntegrators = "0.18.6"
-GeometricIntegratorsBase = "0.6.9"
+GeometricIntegratorsBase = "0.6.9, 0.7"
 GeometricProblems = "0.9.1"
 Logging = "1"
 Markdown = "1"
