@@ -23,9 +23,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- The floors rise to GeometricIntegrators 0.18.6, GeometricIntegratorsBase 0.6.9,
-  GeometricProblems 0.9.1, PoincareInvariants 0.5.1 and SimpleSolvers 0.14.1, because
-  GeometricBase 0.15 declares its stubs public and requires Julia 1.11.
+- The `[compat]` bounds are GeometricIntegrators `"0.19"`, GeometricIntegratorsBase `"0.7"`,
+  GeometricProblems `"0.10"`, PoincareInvariants `"0.5.1"` and SimpleSolvers `"0.14.1"`. The
+  floors of PoincareInvariants and SimpleSolvers are the releases that take GeometricBase 0.15,
+  which declares its stubs public and requires Julia 1.11; the other three are the latest
+  releases. Compat-only; no code or behaviour changes. The breaking changes of these
+  releases do not reach this repository: it uses no symplectic Euler method, whose letters A and B
+  swap in GeometricIntegrators 0.19 and GeometricIntegratorsBase 0.7, and no `LinearWave`, whose
+  state loses its boundary entries in GeometricProblems 0.10. GeometricIntegratorsBase 0.7 still
+  merges `f_stall_window = 50` from `default_options` into the options of `integrate_partial`;
+  the comment in `src/common.jl` cites the line of that merge, which moves to
+  `src/integrator.jl:46`.
 - **Julia 1.12 is the floor** (`[compat] julia = "1.12"`, from 1.11). A caller on Julia 1.11 can
   no longer install this version. The repository records no reason for 1.12. The Aqua
   persistent-tasks check in `test/quality/aqua.jl` lost its `tmax = 300` override, which existed

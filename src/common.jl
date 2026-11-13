@@ -131,7 +131,7 @@ end
 # leave the iterate unmoved while the residual is still large, and — since
 # `GeometricIntegratorsBase` 0.6 — by its `f_stall_window = 50`, which gives up on a solve that
 # spends fifty iterations without halving its residual. That one arrives through the merge in
-# `GeometricIntegratorsBase/src/integrator.jl:47`, so it applies here without being asked for.
+# `GeometricIntegratorsBase/src/integrator.jl:46`, so it applies here without being asked for.
 # `warn_iterations = 0` drops the bare iteration-count warning, the one solver message that
 # `verbosity` does not gate.
 #
